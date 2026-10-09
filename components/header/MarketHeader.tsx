@@ -6,7 +6,15 @@ import LiveTicker from "@/components/header/LiveTicker";
 
 const LIVE_SYMBOLS = ["btcusdt", "ethusdt", "solusdt", "bnbusdt"] as const;
 
-export default function MarketHeader() {
+type MarketHeaderProps = {
+  isSidebarOpen: boolean;
+  onMenuClick: () => void;
+};
+
+export default function MarketHeader({
+  isSidebarOpen,
+  onMenuClick,
+}: MarketHeaderProps) {
   const { status, prices } = useBinancePrices(LIVE_SYMBOLS);
   const latestPrice = Object.values(prices).reduce(
     (latest, price) => !latest || (price?.receivedAt ?? 0) > latest.receivedAt ? price : latest,
@@ -17,9 +25,14 @@ export default function MarketHeader() {
     : null;
 
   return (
-    <header className="sticky top-0 z-30 shrink-0">
+    <header className="sticky top-0 z-30 w-full min-w-0 shrink-0">
       <LiveTicker status={status} prices={prices} />
-      <HeaderToolbar status={status} latency={latency} />
+      <HeaderToolbar
+        status={status}
+        latency={latency}
+        isSidebarOpen={isSidebarOpen}
+        onMenuClick={onMenuClick}
+      />
     </header>
   );
 }

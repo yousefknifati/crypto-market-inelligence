@@ -5,17 +5,25 @@ import {
   FiBell,
   FiChevronDown,
   FiCode,
+  FiMenu,
   FiSearch,
   FiUser,
 } from "react-icons/fi";
 import type { BinanceConnectionStatus } from "@/type/binancePrices";
 
 type HeaderToolbarProps = {
+  isSidebarOpen: boolean;
   status: BinanceConnectionStatus;
   latency: number | null;
+  onMenuClick: () => void;
 };
 
-function HeaderToolbar({ status, latency }: HeaderToolbarProps) {
+function HeaderToolbar({
+  isSidebarOpen,
+  status,
+  latency,
+  onMenuClick,
+}: HeaderToolbarProps) {
   const searchRef = useRef<HTMLInputElement>(null);
   const connected = status === "connected";
 
@@ -31,7 +39,18 @@ function HeaderToolbar({ status, latency }: HeaderToolbarProps) {
   }, []);
 
   return (
-    <div className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-sidebar-border bg-white px-4 shadow-[0_1px_1px_rgba(0,0,0,0.03)] sm:px-6">
+    <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-sidebar-border bg-white px-3 shadow-[0_1px_1px_rgba(0,0,0,0.03)] sm:gap-4 sm:px-6">
+      <button
+        type="button"
+        aria-label="Open navigation menu"
+        aria-controls="terminal-sidebar"
+        aria-expanded={isSidebarOpen}
+        onClick={onMenuClick}
+        className="flex size-9 shrink-0 items-center justify-center rounded-lg text-sidebar-muted outline-none hover:bg-sidebar-surface focus-visible:ring-2 focus-visible:ring-primary/30 xl:hidden"
+      >
+        <FiMenu aria-hidden="true" className="size-5" />
+      </button>
+
       <label className="relative min-w-0 flex-1 sm:max-w-96">
         <span className="sr-only">
           Search markets, pairs, and smart contracts

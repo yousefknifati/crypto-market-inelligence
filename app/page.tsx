@@ -1,12 +1,21 @@
-
 import MarketOverviewHeader from "@/components/market/MarketOverviewHeader";
 import MarketSummaryCards from "@/components/market/MarketSummaryCards";
+import MarketDataTable from "@/components/market/MarketDataTable";
+import LivePriceStream from "@/components/live/LivePriceStream";
 
 export default function Home() {
   return (
-    <div className="min-h-full bg-slate-50 px-4 py-6 sm:px-6">
+    <div className="min-h-full w-full min-w-0 max-w-full overflow-x-hidden bg-slate-50 px-3 py-5 sm:px-6 sm:py-6">
       <MarketOverviewHeader />
       <MarketSummaryCards />
+      <div className="items-start gap-5 xl:flex">
+        <div className="min-w-0 flex-1">
+          <MarketDataTable />
+        </div>
+        <aside aria-label="Live market tools" className="mt-6 shrink-0 xl:w-75">
+          <LivePriceStream />
+        </aside>
+      </div>
     </div>
   );
 }

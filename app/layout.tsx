@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import { Geist_Mono, Montserrat } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
+import ReduxProvider from "@/providers/ReduxProvider";
 import AppToaster from "@/components/ui/AppToaster";
-import Sidebar from "@/components/sidebar/Sidebar";
-import MarketHeader from "@/components/header/MarketHeader";
-import { Suspense } from "react";
+import DashboardShell from "@/components/layout/DashboardShell";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -30,21 +29,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${montserrat.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ReactQueryProvider>
-          <NextTopLoader color="#1b86be" />
-          <div className="flex min-h-dvh">
-            <Suspense fallback={<div className="w-15 shrink-0 sm:w-64" />}>
-              <Sidebar />
-            </Suspense>
-            <div className="flex min-w-0 flex-1 flex-col">
-              <MarketHeader />
-              <main id="main-content" className="min-w-0 flex-1">
-                {children}
-              </main>
-            </div>
-          </div>
-          <AppToaster />
-        </ReactQueryProvider>
+        <ReduxProvider>
+          <ReactQueryProvider>
+            <NextTopLoader color="#1b86be" />
+            <DashboardShell>{children}</DashboardShell>
+            <AppToaster />
+          </ReactQueryProvider>
+        </ReduxProvider>
       </body>
     </html>
   );
