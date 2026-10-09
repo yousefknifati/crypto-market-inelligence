@@ -7,7 +7,9 @@ export type BinanceConnectionStatus =
 export type BinancePrice = {
   symbol: string;
   price: string;
+  priceChangePercent: number;
   eventTime: number;
+  receivedAt: number;
 };
 
 export type BinancePriceState = {

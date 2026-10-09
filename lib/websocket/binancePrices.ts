@@ -80,15 +80,25 @@ export function subscribeBinancePrices({
         !selectedSymbols.has(data.s) ||
         !("c" in data) || typeof data.c !== "string" ||
         data.c.trim() === "" || !Number.isFinite(Number(data.c)) ||
+        !("o" in data) || typeof data.o !== "string" ||
+        data.o.trim() === "" || !Number.isFinite(Number(data.o)) || Number(data.o) === 0 ||
         !("E" in data) || typeof data.E !== "number" || !Number.isFinite(data.E)
       ) return;
+
+      const priceChangePercent = ((Number(data.c) - Number(data.o)) / Number(data.o)) * 100;
 
       attempts = 0;
       state = {
         status: "connected",
         prices: {
           ...state.prices,
-          [data.s]: { symbol: data.s, price: data.c, eventTime: data.E },
+          [data.s]: {
+            symbol: data.s,
+            price: data.c,
+            priceChangePercent,
+            eventTime: data.E,
+            receivedAt: Date.now(),
+          },
         },
       };
       onState(state);

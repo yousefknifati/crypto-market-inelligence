@@ -3,6 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
 import AppToaster from "@/components/ui/AppToaster";
+import Sidebar from "@/components/sidebar/Sidebar";
+import MarketHeader from "@/components/header/MarketHeader";
+import { Suspense } from "react";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,7 +32,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <ReactQueryProvider>
           <NextTopLoader color="#1b86be" />
-          {children}
+          <div className="flex min-h-dvh">
+            <Suspense fallback={<div className="w-15 shrink-0 sm:w-64" />}>
+              <Sidebar />
+            </Suspense>
+            <div className="flex min-w-0 flex-1 flex-col">
+              <MarketHeader />
+              <main id="main-content" className="min-w-0 flex-1">
+                {children}
+              </main>
+            </div>
+          </div>
           <AppToaster />
         </ReactQueryProvider>
       </body>

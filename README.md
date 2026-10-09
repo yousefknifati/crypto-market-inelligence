@@ -82,9 +82,18 @@ Connection status is `connecting`, `connected`, `reconnecting`, or `disconnected
 During reconnection, retained prices are stale; consumers should show the status.
 An empty symbol list or missing URL leaves it disconnected.
 
-Mount the hook only in the live-price widget to keep frequent updates local;
-it does not run globally or open a connection until used. No live widget has
-been added to the page yet.
+The sidebar's isolated `ConnectionStatus` component uses the hook with BTCUSDT
+to show the real connection status. Frequent price updates stay within that
+component. The badge does not claim a measured uptime percentage.
+
+## Sidebar
+
+`components/sidebar/Sidebar.tsx` provides the screenshot-based navigation with
+`react-icons`, active routes, a bottom support section, and a compact icon rail
+below the small breakpoint. The root layout mounts it beside the page content.
+Market Overview and Watchlist are connected to their routes; both pages are
+currently empty shells. Other navigation/support actions remain disabled until
+their destinations exist. The small brand wordmark is text, pending a logo asset.
 
 ## Learn More
 
