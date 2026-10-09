@@ -2,6 +2,32 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+Configure these server-side variables in `.env.local` and in your deployment environment:
+
+```dotenv
+COINGECKO_API_BASE_URL=https://api.coingecko.com/api/v3
+COINGECKO_DEMO_API_KEY=your_demo_api_key
+```
+
+The `.env.local` file is ignored by Git. The API base URL is configurable;
+the `/simple/price` endpoint path stays in the request module.
+
+Import `getBitcoinPrice` from `@/lib/api/getBitcoinPrice` in server-side code.
+Pass one asset ID, a comma-separated string, or an array of IDs:
+
+```ts
+const prices = await getBitcoinPrice(["bitcoin", "ethereum", "solana"]);
+const ethereumPrice = prices.ethereum?.usd;
+```
+
+It uses CoinGecko's `/api/v3/simple/price` endpoint with the supplied `ids` and
+`vs_currencies=usd` through Axios. It returns the response body keyed by asset ID;
+missing assets/prices remain absent rather than becoming zero. It rejects empty
+input, missing configuration, and HTTP errors, with a 10-second request timeout.
+The response type is defined in `type/coinPrices.ts`.
+Axios does not use Next.js fetch caching options;
+configure rendering/caching in the calling route when integrating this helper.
+
 First, run the development server:
 
 ```bash
@@ -19,6 +45,46 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Global providers
+
+The server root layout directly wraps its children in `ReactQueryProvider`.
+It mounts one React Query client (created with `useState`),
+the `#1b86be` navigation loader, and one `AppToaster`. The toaster dynamically
+loads `react-hot-toast` with SSR disabled inside its client component.
+Toasts appear at the top-right, wrap long messages, and use the existing CSS
+theme variables so they follow the system light/dark preference.
+
+The website uses English; no localization provider or language switching is installed.
+
+React Query is available for future interactive data flows. Existing
+server-side Axios helpers remain on the server and are not registered as
+browser query functions.
+
+## Binance live prices
+
+Set the public market-stream URL in `.env.local` and your deployment environment:
+
+```dotenv
+NEXT_PUBLIC_BINANCE_WS_URL=wss://stream.binance.com:9443
+```
+
+Call `useBinancePrices(["btcusdt", "ethusdt"])` inside a Client Component to get
+`{ status, prices }`. Prices are indexed by uppercase trading pair, for example
+`prices.BTCUSDT?.price`. Use Binance trading pairs, not CoinGecko asset IDs.
+USDT pairs are quoted in USDT, not USD. Price strings preserve decimal precision.
+
+The hook uses the browser's native WebSocket with Binance combined `miniTicker`
+streams, validates incoming events, reconnects with capped exponential backoff,
+and closes the connection and clears retry timers on unmount or symbol changes.
+Browser WebSocket handles protocol ping/pong frames automatically.
+Connection status is `connecting`, `connected`, `reconnecting`, or `disconnected`.
+During reconnection, retained prices are stale; consumers should show the status.
+An empty symbol list or missing URL leaves it disconnected.
+
+Mount the hook only in the live-price widget to keep frequent updates local;
+it does not run globally or open a connection until used. No live widget has
+been added to the page yet.
 
 ## Learn More
 
