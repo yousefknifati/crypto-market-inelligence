@@ -55,9 +55,15 @@ This file records development requirements. Deployment and repository publicatio
 - At least one data-driven route must use ISR with an explicit revalidation policy and a documented freshness/performance trade-off.
 - Identify server/browser boundaries and caching behavior in the README. Verify the installed Next.js APIs before implementing rendering or caching choices.
 - Keep data access, UI, state, utilities, and domain types separate. Avoid oversized components, duplicate business logic, and a single oversized Redux slice.
+- Put each reusable utility in its own descriptively named file under `lib/utils`; keep domain-specific data-presence checks named for the response they validate.
+- Extract nontrivial loading skeletons into their own component files instead of defining them inside the data-rendering component.
+- Destructure the states and actions consumed from hooks such as `useQuery` rather than retaining a generic result object throughout the component.
+- Keep Tailwind utility strings directly on the relevant JSX `className`. Do not move markup-specific classes into string constants; extract a component when styling is genuinely shared.
+- Build repeated interface elements such as buttons, headings, and badges as shared components in `components/ui`. Reuse or extend their typed variants before writing feature-specific copies so visual states, accessibility behavior, and interaction styling stay consistent across routes.
 - Use shared client state for favorites, preferences, selected live symbols, or filters only when sharing is useful.
 - If RTK Query is introduced, document why it fits that data flow better than direct server fetching.
 - Type external API responses and component contracts. Centralize reusable domain types, avoid broad `any` usage, and handle nullable/missing fields defensively.
+- Every API-backed interface must explicitly handle loading, error, empty, and null/missing-data states. Keep these states distinct: show progress while waiting, an actionable error with retry when appropriate, a clear empty result after a successful response with no records, and safe field-level fallbacks for nullable or omitted values. Never let absent API data cause an uncaught render error or display misleading fabricated values.
 
 Suggested organization from the challenge; adapt to existing project conventions rather than reorganizing unrelated code:
 
