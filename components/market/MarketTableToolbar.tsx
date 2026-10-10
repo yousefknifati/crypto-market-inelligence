@@ -70,6 +70,7 @@ export default function MarketTableToolbar({
           <span className="sr-only">Search assets by name or symbol</span>
           <FiSearch aria-hidden="true" className="pointer-events-none absolute top-2.5 left-3.5 size-3 text-slate-400" />
           <input
+            id="market-search"
             type="search"
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}

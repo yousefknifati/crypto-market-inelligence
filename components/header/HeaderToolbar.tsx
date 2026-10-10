@@ -1,6 +1,7 @@
 "use client";
 
-import { memo, useEffect, useRef } from "react";
+import { memo, useCallback, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   FiBell,
   FiChevronDown,
@@ -24,19 +25,28 @@ function HeaderToolbar({
   latency,
   onMenuClick,
 }: HeaderToolbarProps) {
-  const searchRef = useRef<HTMLInputElement>(null);
+  const pathname = usePathname();
+  const router = useRouter();
   const connected = status === "connected";
+  const openMarketSearch = useCallback(() => {
+    if (pathname === "/") {
+      document.getElementById("market-search")?.focus();
+      return;
+    }
+
+    router.push("/#market-search");
+  }, [pathname, router]);
 
   useEffect(() => {
     const focusSearch = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        searchRef.current?.focus();
+        openMarketSearch();
       }
     };
     window.addEventListener("keydown", focusSearch);
     return () => window.removeEventListener("keydown", focusSearch);
-  }, []);
+  }, [openMarketSearch]);
 
   return (
     <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-sidebar-border bg-white px-3 shadow-[0_1px_1px_rgba(0,0,0,0.03)] sm:gap-4 sm:px-6">
@@ -51,24 +61,23 @@ function HeaderToolbar({
         <FiMenu aria-hidden="true" className="size-5" />
       </button>
 
-      <label className="relative min-w-0 flex-1 sm:max-w-96">
-        <span className="sr-only">
-          Search markets, pairs, and smart contracts
-        </span>
+      <button
+        type="button"
+        onClick={openMarketSearch}
+        aria-label="Go to asset search"
+        className="relative h-9 min-w-0 flex-1 rounded-lg border border-sidebar-border bg-sidebar-surface pr-12 pl-[37px] text-left text-xs text-slate-400 outline-none hover:border-slate-300 hover:bg-white focus-visible:ring-2 focus-visible:ring-primary/30 sm:max-w-96"
+      >
         <FiSearch
           aria-hidden="true"
           className="pointer-events-none absolute top-[11px] left-[14px] size-3.5 text-slate-400"
         />
-        <input
-          ref={searchRef}
-          type="search"
-          placeholder="Global search markets, pairs, smart contracts..."
-          className="h-9 w-full rounded-lg border border-sidebar-border bg-sidebar-surface pr-12 pl-[37px] text-xs text-slate-800 outline-none placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/15"
-        />
+        <span className="block truncate">
+          Search assets by name or symbol...
+        </span>
         <kbd className="pointer-events-none absolute top-[7px] right-2.5 hidden rounded border border-sidebar-border bg-white px-[7px] py-0.5 font-mono text-[10px] leading-[15px] text-sidebar-muted sm:block">
           ⌘K
         </kbd>
-      </label>
+      </button>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <button

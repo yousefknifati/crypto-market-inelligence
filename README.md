@@ -1,255 +1,173 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Crypto Market Intelligence
 
-## Asset detail presentation
+A production-minded cryptocurrency dashboard built for the NMO Business Senior Frontend Developer challenge. It combines request-time market rankings, revalidated asset detail pages, a persistent Redux watchlist, and isolated Binance WebSocket streams in a responsive Next.js application.
 
-## Watchlist
+- Live application: https://crypto-market-inelligence.vercel.app
+- Source repository: https://github.com/yousefknifati/crypto-market-inelligence
 
-`/watchlist` restores favorite CoinGecko IDs from the existing Redux/localStorage
-flow, then requests only those assets through `/api/market/coins?ids=...`. The
-server route forwards the IDs to CoinGecko's `/coins/markets` endpoint so the
-browser never receives the API key and the page does not download unrelated
-market rows. The response is cached by React Query for 60 seconds while the IDs
-remain in Redux as the only shared watchlist state.
+## Product features
 
-The page includes saved/gainer/performance summaries, search, sorting, links to
-asset details, and removal through the shared table row. Restoring, loading,
-empty, filtered-empty, missing-data, and retryable error states are distinct.
-Motion provides a small state transition and uses `useReducedMotion` to disable
-movement when requested. The initial server/client render masks persisted values
-until hydration completes, preventing localStorage-driven attribute mismatches.
+- Server-rendered top-100 market overview with asset search, gainers/losers filters, four sorting options, pagination, and incremental loading.
+- Dynamic `/market/[id]` pages with market statistics, CoinGecko attribution, a keyboard-accessible seven-day price chart, CSV export, and proper 404s.
+- Redux Toolkit watchlist with focused actions/selectors, localStorage persistence, hydration-safe restoration, watchlist search, and sorting.
+- Binance `miniTicker` and trade streams with connected, reconnecting, and disconnected states, capped reconnect behavior, manual retry, and cleanup.
+- Purposeful Motion route/card/list transitions that respect reduced motion.
+- Explicit loading, empty, missing-data, error, and retry states.
 
-Route content uses a short fade and vertical reveal to orient users after
-navigation. Market summary and fundamental metric cards use a reusable staggered
-reveal with a two-pixel hover lift, while the market table uses a short entrance
-to make new results easier to locate after an empty or loading state. Row hover
-and keyboard-focus styles highlight the active asset, and the watchlist star
-uses a small scale/rotation micro-interaction. `useReducedMotion` removes route,
-card, table, and control transforms without removing non-motion visual feedback.
+## Tech stack
 
-### Home SSR and detail ISR boundaries
+- Next.js 16 App Router, React 19, and TypeScript
+- Tailwind CSS 4
+- Redux Toolkit, React Redux, and TanStack React Query
+- Axios for CoinGecko REST requests
+- Motion for React
+- Native browser WebSocket connections to Binance public market streams
+- Vercel deployment
 
-On `/`, `MarketSnapshot` waits for a real request using Next.js `connection()`
-and calls the uncached, server-only Axios `getCoinGeckoMarkets` helper directly.
-This deliberately fetches current market-cap rankings per server request instead
-of freezing the initial table at build time. The trade-off is an upstream API
-request and its latency for each page request. A local Suspense boundary streams
-the existing table skeleton while the surrounding dashboard can render.
+## Architecture and data flow
 
-The server passes the snapshot to `MarketDataTable`, whose initial rows are
-included in server-rendered HTML. Its client boundary handles search, filters,
-sorting, pagination, and watchlist interaction. The table no longer fetches a
-duplicate snapshot with React Query or copies market responses into Redux.
-An upstream failure renders an error with Retry; Retry uses `router.refresh()`
-to fetch a new server snapshot. Empty successful responses remain distinct.
-Browser filtering uses the fetched top 100 assets; it does not fetch on each
-keystroke or automatically refresh on window focus.
-
-`/market/[id]` retains its explicit ISR caching: 60-second revalidation and
-300-second expiry. This reduces upstream traffic for repeated detail visits
-while allowing modest staleness. Revalidation is demand-driven, not polling.
-The existing `/api/market/coins` response cache is bypassed by home SSR.
-
-The asset detail page composes reusable summary, chart panel, action, and metric
-components. Summary and fundamental data stay server-rendered. The chart panel
-is a client boundary for selecting 24H/7D and fullscreen; it filters the existing
-seven-day hourly response with `useMemo`. Detail requests retain their existing
-60-second revalidation and 300-second expiry policy.
-
-Watchlist actions use the existing Redux persistence. CSV export contains actual
-timestamp/price observations, not OHLCV candles. Sharing copies the asset URL.
-Alerts, candles, depth, and longer chart periods are visibly disabled because
-their data or service is not integrated. Network health displays an unavailable
-state; source attribution is CoinGecko. The breadcrumb feed badge reports the
-shared Binance BTC stream's actual connection state, not asset-specific latency.
-
-The supplied screenshots guided this layout using Codex. The design's static
-live status, FIX protocol label, and oracle verification claim were corrected
-to reflect the implemented sources rather than copied as factual claims.
-
-## Getting Started
-
-Configure these server-side variables in `.env.local` and in your deployment environment:
-
-```dotenv
-COINGECKO_API_BASE_URL=https://api.coingecko.com/api/v3
-COINGECKO_DEMO_API_KEY=your_demo_api_key
-SITE_URL=https://your-public-domain.example
+```mermaid
+flowchart LR
+  Browser -->|request| Next[Next.js App Router]
+  Next -->|server-only Axios| CoinGecko[CoinGecko REST API]
+  Next -->|server-rendered snapshot| Browser
+  Browser -->|miniTicker and trade streams| Binance[Binance WebSocket]
+  Browser --> Redux[Redux watchlist]
+  Redux <--> Storage[localStorage]
+  Browser -->|watchlist/global requests| Routes[Next.js route handlers]
+  Routes --> CoinGecko
 ```
 
-The `.env.local` file is ignored by Git. The API base URL is configurable;
-the `/simple/price` endpoint path stays in the request module.
+Server-fetched market responses remain outside Redux. Redux stores only the favorite asset IDs shared by the overview, detail, and watchlist interfaces. WebSocket state stays inside the small components that render it, preventing frequent ticks from rerendering the market table or page content.
 
-Import `getBitcoinPrice` from `@/lib/api/getBitcoinPrice` in server-side code.
-Pass one asset ID, a comma-separated string, or an array of IDs:
+## Rendering and caching decisions
+
+### Request-time SSR: `/`
+
+`MarketSnapshot` calls Next.js `connection()` before the uncached, server-only CoinGecko request. Market-cap rankings therefore reflect each incoming page request instead of a build-time snapshot. A local Suspense boundary streams the table skeleton while the surrounding dashboard renders. The freshness trade-off is one upstream market request and its latency per initial request.
+
+The server passes the response to the interactive table. Search, filters, sorting, pagination, and watchlist controls run in the browser without duplicating the server response in Redux.
+
+### ISR: `/market/[id]`
+
+Asset detail and chart helpers use `use cache` with:
 
 ```ts
-const prices = await getBitcoinPrice(["bitcoin", "ethereum", "solana"]);
-const ethereumPrice = prices.ethereum?.usd;
+cacheLife({ stale: 60, revalidate: 60, expire: 300 });
 ```
 
-It uses CoinGecko's `/api/v3/simple/price` endpoint with the supplied `ids` and
-`vs_currencies=usd` through Axios. It returns the response body keyed by asset ID;
-missing assets/prices remain absent rather than becoming zero. It rejects empty
-input, missing configuration, and HTTP errors, with a 10-second request timeout.
-The response type is defined in `type/coinPrices.ts`.
-Axios does not use Next.js fetch caching options;
-configure rendering/caching in the calling route when integrating this helper.
+Repeated detail visits can reuse data, requests after 60 seconds trigger background regeneration, and an entry unused for 300 seconds must refresh synchronously. This accepts modest staleness to reduce CoinGecko traffic while the separate Binance ticker supplies live prices.
 
-## SEO
+### Client rendering
 
-The home route and every asset-detail route publish unique titles, descriptions,
-canonical URLs, Open Graph fields, and Twitter card metadata through the Next.js
-Metadata API. Asset metadata is generated from the server-fetched CoinGecko
-record. Home content and asset statistics are present in the server-rendered HTML,
-with one page-level `h1` and ordered section headings.
+Client Components are limited to interaction or browser APIs: Redux persistence, React Query views, navigation drawer behavior, charts, Motion, toast rendering, and WebSocket subscriptions. The watchlist masks persisted values until Redux hydration finishes, avoiding server/client mismatches.
 
-Next.js serves `robots.txt` from `app/robots.ts` and `sitemap.xml` from
-`app/sitemap.ts`. The sitemap includes the home page and available asset-detail
-URLs. Home emits `WebSite` JSON-LD; detail pages emit `Dataset` and breadcrumb
-JSON-LD with CoinGecko attribution. JSON-LD values are serialized with `<`
-characters escaped before insertion into the script element.
+## Data sources
 
-Set `SITE_URL` to the public production origin so canonical URLs, structured data,
-robots, and sitemap entries use the deployed domain. If no public origin is
-configured, local builds deliberately emit `noindex` metadata, disallow crawling
-in `robots.txt`, and return an empty sitemap. Vercel production URL variables are
-used automatically when present.
+- CoinGecko REST API: rankings, global totals, asset details, and chart history.
+- Binance public WebSocket: combined `miniTicker` and trade streams.
 
-## Accessibility and resilience
+The interface labels unavailable fields instead of fabricating market values. Unsupported design concepts such as oracle verification, FIX connectivity, order-book depth, alerts, and long chart periods are disabled or omitted.
 
-The dashboard provides a skip link, visible keyboard focus, labeled search and
-sort fields, names for icon-only controls, and a mobile navigation drawer that
-traps focus, closes with Escape, and restores focus to its trigger. The market
-chart supports pointer inspection plus Left/Right, Home, and End keyboard
-navigation. Statuses and price directions include text, signs, or icons so color
-is not the only cue. Motion transitions and skeleton animation respect the
-operating system's reduced-motion preference.
+## Local setup
 
-REST-backed views distinguish loading, error, empty, and missing-field states.
-Retry actions are available for the market overview, summary, watchlist, asset
-details, and historical chart. Binance streams expose connecting, reconnecting,
-connected, and disconnected labels, retry with capped backoff, clean up sockets
-and timers, and reject invalid stream configuration without throwing into the
-React tree. Nullable numeric fields render as `Unavailable` instead of fabricated
-zero values.
-
-Secrets stay in ignored `.env.local` files or deployment environment variables.
-Only placeholder values are documented; public WebSocket URLs are safe to expose
-through `NEXT_PUBLIC_` configuration.
-
-## Performance decisions
-
-`MarketDataTable` memoizes the search, filter, and sort pipeline because it can
-process and reorder up to 100 market rows on each interactive change. The
-watchlist memoizes its ID lookup and visible sorting pipeline, and the detail
-chart memoizes its 24-hour slice of the seven-day series. These are the derived
-collections whose repeated work grows with the response size.
-
-`MarketTableRow` uses `React.memo` because rows repeat and retain stable asset
-object references while unrelated table controls change. Each row also selects
-only its own favorite boolean, so toggling one favorite does not make every row
-respond to the Redux update. `HeaderToolbar` and `LiveTicker` are memoized around
-the high-frequency header stream, while stable drawer callbacks are supplied
-with `useCallback`. Small fixed-size operations, such as finding the latest item
-among three or four live symbols, remain plain calculations to avoid premature
-memoization.
-
-Pages and data-fetching components remain Server Components. Client boundaries
-are limited to browser state, WebSocket subscriptions, Redux persistence, chart
-interaction, and retry controls; nested accessibility hooks inherit their client
-owner instead of declaring additional boundaries. CoinGecko logos use
-`next/image`. The noncritical live-price widget and toast renderer are loaded
-with `next/dynamic` and render lightweight fallbacks while their client code
-loads.
-
-Frequent Binance updates stay inside `MarketHeader`, `ConnectionStatus`, or
-`LivePriceStream`; they are not copied into Redux or a page-level context. This
-keeps market tables, summary cards, asset details, and watchlist content outside
-the WebSocket render path. Sockets and reconnect timers are cleaned up whenever
-their owning component unmounts or its subscription changes.
-
-First, run the development server:
+Requirements: Node.js 20 or newer and npm.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/yousefknifati/crypto-market-inelligence.git
+cd crypto-market-inelligence
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Global providers
-
-The server root layout directly wraps its children in `ReactQueryProvider`.
-It mounts one React Query client (created with `useState`),
-the `#1b86be` navigation loader, and one `AppToaster`. The toaster dynamically
-loads `react-hot-toast` with SSR disabled inside its client component.
-Toasts appear at the top-right, wrap long messages, and use the existing CSS
-theme variables so they follow the system light/dark preference.
-
-The website uses English; no localization provider or language switching is installed.
-
-React Query is available for future interactive data flows. Existing
-server-side Axios helpers remain on the server and are not registered as
-browser query functions.
-
-## Binance live prices
-
-The browser streams default to Binance's public market-data endpoint, so no
-WebSocket environment variable is required in development or production. To
-use a different compatible Binance endpoint, set this optional public override:
+Create `.env.local`:
 
 ```dotenv
+# Optional; defaults to https://api.coingecko.com/api/v3
+COINGECKO_API_BASE_URL=https://api.coingecko.com/api/v3
+
+# Recommended to improve CoinGecko demo-tier reliability. Never expose it with
+# a NEXT_PUBLIC_ prefix.
+COINGECKO_DEMO_API_KEY=your_demo_api_key
+
+# Use the public production origin when deploying.
+SITE_URL=http://localhost:3000
+
+# Optional public override; this public endpoint is also the default.
 NEXT_PUBLIC_BINANCE_WS_URL=wss://data-stream.binance.vision
 ```
 
-Call `useBinancePrices(["btcusdt", "ethusdt"])` inside a Client Component to get
-`{ status, prices }`. Prices are indexed by uppercase trading pair, for example
-`prices.BTCUSDT?.price`. Use Binance trading pairs, not CoinGecko asset IDs.
-USDT pairs are quoted in USDT, not USD. Price strings preserve decimal precision.
+Run and verify:
 
-The hook uses the browser's native WebSocket with Binance combined `miniTicker`
-streams, validates incoming events, reconnects with capped exponential backoff,
-and closes the connection and clears retry timers on unmount or symbol changes.
-Browser WebSocket handles protocol ping/pong frames automatically.
-Connection status is `connecting`, `connected`, `reconnecting`, or `disconnected`.
-During reconnection, retained prices are stale; consumers should show the status.
-An empty symbol list or invalid override leaves it disconnected. The header,
-sidebar, asset-detail feed badge, and live trade panel share the same endpoint
-configuration so their production behavior does not diverge.
+```bash
+npm run dev
+npm run lint
+npm run build
+npm run start
+```
 
-The sidebar's isolated `ConnectionStatus` component uses the hook with BTCUSDT
-to show the real connection status. Frequent price updates stay within that
-component. The badge does not claim a measured uptime percentage.
+## Redux state design
 
-## Sidebar
+The `watchlist` slice contains `favoriteIds` and a hydration flag. Its focused actions add, remove, toggle, and restore favorites; selectors expose the ID list, hydration state, and one asset's favorite state. The provider creates one store per application session, restores validated string IDs from localStorage after mount, and persists only after hydration.
 
-`components/sidebar/Sidebar.tsx` provides the screenshot-based navigation with
-`react-icons`, active routes, a bottom support section, and a compact icon rail
-below the small breakpoint. The root layout mounts it beside the page content.
-Market Overview and Watchlist are connected to their routes; both pages are
-currently empty shells. Other navigation/support actions remain disabled until
-their destinations exist. The small brand wordmark is text, pending a logo asset.
+## Performance decisions
 
-## Learn More
+- `MarketDataTable` memoizes the top-100 search/filter/sort pipeline.
+- `WatchlistContent` memoizes its ID lookup and visible sorting pipeline.
+- `MarketChartPanel` memoizes the 24-hour slice of the seven-day series.
+- `MarketTableRow` uses `React.memo` because it is repeated and receives stable asset references; each row selects only its own favorite boolean.
+- `HeaderToolbar` and `LiveTicker` are memoized around frequent header ticks.
+- Drawer and search callbacks use `useCallback` so memoized descendants receive stable function identities.
+- Small fixed-size calculations remain unmemoized to avoid needless complexity.
+- Coin logos use `next/image`; the noncritical trade widget and toaster are loaded with `next/dynamic`.
+- WebSocket updates stay in the header, connection badge, or live panel and are never copied into Redux or a page-level context.
 
-To learn more about Next.js, take a look at the following resources:
+## Motion and interaction
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Route content uses a short fade/vertical reveal. Summary and fundamental cards use one reusable stagger component with a small hover lift. Market rows receive pointer and keyboard-focus emphasis, and the favorite star uses a restrained scale/rotation interaction. `useReducedMotion` and global reduced-motion CSS remove movement while retaining focus, status, and color feedback.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## SEO
 
-## Deploy on Vercel
+- Unique home and dynamically generated asset titles/descriptions.
+- Canonical URLs, Open Graph metadata, and Twitter card metadata.
+- `app/robots.ts` and `app/sitemap.ts` using Next.js metadata conventions.
+- `WebSite`, `Dataset`, and breadcrumb JSON-LD with escaped serialization.
+- Server-rendered primary market/detail content and ordered heading levels.
+- Localhost output is `noindex`; Vercel's production origin is a safe fallback when `SITE_URL` is omitted.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Accessibility and resilience
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Skip link, visible focus states, semantic navigation, labeled fields, and names for icon-only controls.
+- Focus-trapped mobile drawer with Escape close and trigger-focus restoration.
+- Keyboard chart inspection with Arrow keys, Home, and End.
+- Status text/icons supplement color for trends and connection state.
+- Responsive overflow handling for dense market tables.
+- Retryable REST failures and distinct loading, empty, and missing-data states.
+- Defensive external-response checks and nullable field fallbacks.
+- WebSocket validation, capped reconnects, manual retry, and socket/timer cleanup.
+- Secrets remain server-side in ignored environment files or deployment settings.
+
+## Deployment
+
+1. Import the repository into Vercel.
+2. Add `COINGECKO_DEMO_API_KEY` to Production and Preview environments.
+3. Set `SITE_URL` to the stable public production origin.
+4. Deploy from the final commit.
+5. Verify `/`, `/watchlist`, `/market/bitcoin`, an invalid asset URL, `/robots.txt`, `/sitemap.xml`, and live WebSocket status.
+
+The deployment must remain publicly reachable without Vercel authentication.
+
+## AI Usage
+
+Codex was used to accelerate Figma inspection, component scaffolding, API and type tracing, accessibility review, SEO setup, Motion integration, and final verification. Every change was reviewed against the installed Next.js 16 documentation and the challenge requirements.
+
+One generated approach dynamically imported the live Client Component directly from a Server Component. The installed Next.js documentation states that this does not provide automatic code splitting, so it was corrected to use a small client wrapper with `ssr: false`. Static design claims for FIX connectivity and oracle verification were also rejected because the implemented sources could not substantiate them.
+
+## Known limitations and next-day improvements
+
+- CoinGecko demo-tier rate limits can temporarily reduce REST availability.
+- Favorites are browser-local and do not sync between devices.
+- The overview loads the top 100 assets and filters them client-side; a larger catalog would need server pagination or virtualization.
+- Historical data is limited to a seven-day area chart. Candles, depth, alerts, and longer periods require additional data sources and backend services.
+- Header/sidebar/detail price badges currently use isolated sockets. At larger scale, a shared external store should multiplex one connection and selectors.
+- Non-core sidebar destinations and account controls remain disabled.
+- Automated selector/component tests and CI are optional challenge bonuses and have not been added; they are the first delivery-discipline improvement.

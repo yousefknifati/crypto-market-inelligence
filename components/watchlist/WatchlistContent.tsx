@@ -12,6 +12,7 @@ import {
   FiTrendingDown,
   FiTrendingUp,
 } from "react-icons/fi";
+import { IoArrowBack } from "react-icons/io5";
 import MarketTable from "@/components/market/MarketTable";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -131,8 +132,9 @@ export default function WatchlistContent() {
         </div>
         <Link
           href="/"
-          className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-3.5 text-[13px] font-semibold text-white outline-none hover:bg-indigo-700 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2"
+          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-[13px] font-semibold text-white outline-none hover:bg-indigo-700 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2"
         >
+          <IoArrowBack aria-hidden="true" className="size-4" />
           Browse market
         </Link>
       </header>

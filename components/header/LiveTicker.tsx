@@ -86,14 +86,6 @@ function LiveTicker({ status, prices }: LiveTickerProps) {
           );
         })}
       </div>
-
-      <div className="ml-4 hidden min-w-max items-center gap-4 border-l border-sidebar-border pl-4 text-sidebar-muted xl:flex">
-        <span>Global Liquidity: $1.84T</span>
-        <span aria-hidden="true" className="text-slate-300">
-          |
-        </span>
-        <span>NYSE / CME Bridge: Open</span>
-      </div>
     </section>
   );
 }

@@ -11,8 +11,8 @@ export default function MarketOverviewHeader() {
           <Heading level={1} size="lg">
             Market Overview
           </Heading>
-          <Badge className="max-w-full whitespace-normal" tone="success" dot>
-            Live Stream Active • CoinGecko API Sync
+          <Badge className="max-w-full whitespace-normal">
+            CoinGecko Market Data • Binance Live Prices
           </Badge>
         </div>
         <p className="text-sm leading-5 text-sidebar-muted">
