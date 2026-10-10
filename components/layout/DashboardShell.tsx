@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useRef, useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import MarketHeader from "@/components/header/MarketHeader";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { useAccessibleNavigationDrawer } from "@/hooks/useAccessibleNavigationDrawer";
@@ -11,6 +13,8 @@ type DashboardShellProps = {
 
 export default function DashboardShell({ children }: DashboardShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const pathname = usePathname();
+  const prefersReducedMotion = useReducedMotion();
   const pageContentRef = useRef<HTMLDivElement>(null);
   const closeSidebar = useCallback(() => setIsSidebarOpen(false), []);
   const openSidebar = useCallback(() => setIsSidebarOpen(true), []);
@@ -49,7 +53,24 @@ export default function DashboardShell({ children }: DashboardShellProps) {
           onMenuClick={openSidebar}
         />
         <main id="main-content" tabIndex={-1} className="min-w-0 flex-1">
-          {children}
+          <AnimatePresence mode="wait" initial={!prefersReducedMotion}>
+            <motion.div
+              key={pathname}
+              initial={
+                prefersReducedMotion ? false : { opacity: 0, y: 8 }
+              }
+              animate={{ opacity: 1, y: 0 }}
+              exit={
+                prefersReducedMotion ? undefined : { opacity: 0, y: -4 }
+              }
+              transition={{
+                duration: prefersReducedMotion ? 0 : 0.18,
+                ease: "easeOut",
+              }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </div>

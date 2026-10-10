@@ -1,3 +1,6 @@
+"use client";
+
+import { motion, useReducedMotion } from "motion/react";
 import MarketTableRow from "@/components/market/MarketTableRow";
 import type { CoinMarket } from "@/types/coinMarket";
 
@@ -7,8 +10,18 @@ type MarketTableProps = {
 };
 
 export default function MarketTable({ assets, startIndex }: MarketTableProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
-    <div className="overflow-x-auto">
+    <motion.div
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: prefersReducedMotion ? 0 : 0.2,
+        ease: "easeOut",
+      }}
+      className="overflow-x-auto"
+    >
       <table className="w-full min-w-[740px] border-collapse">
         <thead className="border-b border-sidebar-border bg-slate-50/80">
           <tr className="text-[11px] leading-[14px] font-bold tracking-[0.22px] text-sidebar-muted">
@@ -44,10 +57,11 @@ export default function MarketTable({ assets, startIndex }: MarketTableProps) {
               key={asset.id}
               asset={asset}
               fallbackRank={startIndex + index + 1}
+              prefersReducedMotion={Boolean(prefersReducedMotion)}
             />
           ))}
         </tbody>
       </table>
-    </div>
+    </motion.div>
   );
 }

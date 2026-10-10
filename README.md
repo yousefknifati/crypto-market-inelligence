@@ -18,6 +18,14 @@ Motion provides a small state transition and uses `useReducedMotion` to disable
 movement when requested. The initial server/client render masks persisted values
 until hydration completes, preventing localStorage-driven attribute mismatches.
 
+Route content uses a short fade and vertical reveal to orient users after
+navigation. Market summary and fundamental metric cards use a reusable staggered
+reveal with a two-pixel hover lift, while the market table uses a short entrance
+to make new results easier to locate after an empty or loading state. Row hover
+and keyboard-focus styles highlight the active asset, and the watchlist star
+uses a small scale/rotation micro-interaction. `useReducedMotion` removes route,
+card, table, and control transforms without removing non-motion visual feedback.
+
 ### Home SSR and detail ISR boundaries
 
 On `/`, `MarketSnapshot` waits for a real request using Next.js `connection()`

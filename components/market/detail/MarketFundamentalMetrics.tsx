@@ -8,6 +8,7 @@ import {
 } from "react-icons/fi";
 import Heading from "@/components/ui/Heading";
 import Badge from "@/components/ui/Badge";
+import MotionStaggerGrid from "@/components/ui/MotionStaggerGrid";
 import MarketStatCard from "./MarketStatCard";
 import { formatCompactUsd } from "@/lib/utils/formatCompactUsd";
 import { formatSupply } from "@/lib/utils/formatSupply";
@@ -38,7 +39,7 @@ export default function MarketFundamentalMetrics({
         </Heading>
         <p className="text-[11px] text-sidebar-muted">Source: CoinGecko</p>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <MotionStaggerGrid className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <MarketStatCard
           label="Market Capitalization"
           icon={<FiBarChart2 />}
@@ -131,7 +132,7 @@ export default function MarketFundamentalMetrics({
             market feed.
           </p>
         </MarketStatCard>
-      </div>
+      </MotionStaggerGrid>
     </section>
   );
 }

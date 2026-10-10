@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import Button from "@/components/ui/Button";
 import MarketSummaryCard from "@/components/market/MarketSummaryCard";
 import MarketSummaryCardsSkeleton from "@/components/market/MarketSummaryCardsSkeleton";
+import MotionStaggerGrid from "@/components/ui/MotionStaggerGrid";
 import { getGlobalMarketData } from "@/lib/api/getGlobalMarketData";
 import { formatLargeCurrency } from "@/lib/utils/formatLargeCurrency";
 import { formatPercentage } from "@/lib/utils/formatPercentage";
@@ -69,8 +70,9 @@ export default function MarketSummaryCards() {
     : null;
 
   return (
-    <section aria-label="Global market summary" className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      <MarketSummaryCard
+    <section aria-label="Global market summary" className="mt-6">
+      <MotionStaggerGrid className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <MarketSummaryCard
         title="Total Market Cap"
         trend={{
           direction: marketChangeDirection,
@@ -86,9 +88,9 @@ export default function MarketSummaryCards() {
         <p className="whitespace-nowrap text-[30px] leading-[38px] font-bold tracking-[-0.75px] text-slate-900">
           {marketCap ? `${marketCap.amount}${marketCap.unit ? ` ${marketCap.unit}` : ""}` : "Unavailable"}
         </p>
-      </MarketSummaryCard>
+        </MarketSummaryCard>
 
-      <MarketSummaryCard
+        <MarketSummaryCard
         title="24h Trading Volume"
         trend={{ direction: "neutral", label: "24h unavailable" }}
         footerLabel="CEX share unavailable"
@@ -100,9 +102,9 @@ export default function MarketSummaryCards() {
           {volume?.amount ?? "Unavailable"}
           {volume?.unit && <span className="block">{volume.unit}</span>}
         </p>
-      </MarketSummaryCard>
+        </MarketSummaryCard>
 
-      <MarketSummaryCard
+        <MarketSummaryCard
         title="Market Dominance"
         trend={{ direction: "neutral", label: "BTC change unavailable" }}
         footerLabel="BTC Dominance Share"
@@ -128,7 +130,8 @@ export default function MarketSummaryCards() {
             <span className="text-[11px] leading-[14px] font-medium tracking-[0.22px] text-sidebar-muted">ETH</span>
           </p>
         </div>
-      </MarketSummaryCard>
+        </MarketSummaryCard>
+      </MotionStaggerGrid>
     </section>
   );
 }
