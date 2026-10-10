@@ -34,7 +34,7 @@ flowchart LR
   Browser -->|miniTicker and trade streams| Binance[Binance WebSocket]
   Browser --> Redux[Redux watchlist]
   Redux <--> Storage[localStorage]
-  Browser -->|watchlist/global requests| Routes[Next.js route handlers]
+  Browser -->|watchlist requests| Routes[Next.js route handler]
   Routes --> CoinGecko
 ```
 

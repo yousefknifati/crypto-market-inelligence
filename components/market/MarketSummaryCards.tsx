@@ -1,46 +1,30 @@
-"use client";
-
-import { useQuery } from "@tanstack/react-query";
-import Button from "@/components/ui/Button";
 import MarketSummaryCard from "@/components/market/MarketSummaryCard";
-import MarketSummaryCardsSkeleton from "@/components/market/MarketSummaryCardsSkeleton";
 import MotionStaggerGrid from "@/components/ui/MotionStaggerGrid";
-import { getGlobalMarketData } from "@/lib/api/getGlobalMarketData";
+import RefreshButton from "@/components/ui/RefreshButton";
+import { getCoinGeckoGlobalMarketData } from "@/lib/api/getCoinGeckoGlobalMarketData";
 import { formatLargeCurrency } from "@/lib/utils/formatLargeCurrency";
 import { formatPercentage } from "@/lib/utils/formatPercentage";
 import { hasGlobalMarketSummaryData } from "@/lib/utils/hasGlobalMarketSummaryData";
 import { isNumber } from "@/lib/utils/isNumber";
+import type { CoinGeckoGlobalMarketResponse } from "@/types/globalMarket";
 
-export default function MarketSummaryCards() {
-  const {
-    data: response,
-    error,
-    isError,
-    isPending,
-    refetch,
-  } = useQuery({
-    queryKey: ["market", "global-summary"],
-    queryFn: getGlobalMarketData,
-    retry: 1,
-    staleTime: 60_000,
-  });
+export default async function MarketSummaryCards() {
+  let response: CoinGeckoGlobalMarketResponse;
 
-  if (isPending) return <MarketSummaryCardsSkeleton />;
-
-  if (isError) {
+  try {
+    response = await getCoinGeckoGlobalMarketData();
+  } catch {
     return (
       <section role="alert" className="mt-6 rounded-xl border border-rose-200 bg-rose-50 p-5 text-rose-800">
         <h2 className="font-semibold">Global market data is unavailable</h2>
-        <p className="mt-1 text-sm">{error.message}</p>
-        <Button className="mt-4" size="sm" onClick={() => void refetch()}>
-          Retry
-        </Button>
+        <p className="mt-1 text-sm">Unable to load the latest global market summary.</p>
+        <RefreshButton className="mt-4" size="sm" />
       </section>
     );
   }
 
   const data = response.data;
-  
+
   if (!data || !hasGlobalMarketSummaryData(data)) {
     return (
       <section role="status" className="mt-6 rounded-xl border border-sidebar-border bg-white p-5 text-sidebar-muted">

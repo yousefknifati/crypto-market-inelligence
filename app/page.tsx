@@ -3,6 +3,7 @@ import MarketSummaryCards from "@/components/market/MarketSummaryCards";
 import { Suspense } from "react";
 import MarketSnapshot from "@/components/market/MarketSnapshot";
 import MarketDataTableSkeleton from "@/components/market/MarketDataTableSkeleton";
+import MarketSummaryCardsSkeleton from "@/components/market/MarketSummaryCardsSkeleton";
 import LazyLivePriceStream from "@/components/live/LazyLivePriceStream";
 import { HomeStructuredData, homeMetadata } from "@/lib/seo/homeSeo";
 
@@ -14,7 +15,9 @@ export default function Home() {
       <HomeStructuredData />
       <div className="min-h-full w-full min-w-0 max-w-full overflow-x-hidden bg-slate-50 px-3 py-5 sm:px-6 sm:py-6">
         <MarketOverviewHeader />
-        <MarketSummaryCards />
+        <Suspense fallback={<MarketSummaryCardsSkeleton />}>
+          <MarketSummaryCards />
+        </Suspense>
         <div className="items-start gap-5 xl:flex">
           <div className="min-w-0 flex-1">
             <Suspense fallback={<MarketDataTableSkeleton />}>
