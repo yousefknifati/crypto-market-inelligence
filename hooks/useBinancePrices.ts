@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { subscribeBinancePrices } from "@/lib/websocket/binancePrices";
+import { BINANCE_STREAM_BASE_URL } from "@/lib/websocket/binanceStreamConfig";
 import type { BinancePriceState } from "@/types/binancePrices";
 
 export function useBinancePrices(
@@ -20,7 +21,7 @@ export function useBinancePrices(
 
   useEffect(() => {
     return subscribeBinancePrices({
-      baseURL: process.env.NEXT_PUBLIC_BINANCE_WS_URL ?? "",
+      baseURL: BINANCE_STREAM_BASE_URL,
       symbols: symbolKey ? symbolKey.split(",") : [],
       onState: setState,
     });

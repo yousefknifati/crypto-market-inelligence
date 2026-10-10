@@ -2,10 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { subscribeBinanceTrades } from "@/lib/websocket/binanceTrades";
+import { createBinanceCombinedStreamURL } from "@/lib/websocket/binanceStreamConfig";
 import type { BinanceTradeStreamState } from "@/types/binanceTrade";
-
-const BINANCE_TRADE_STREAM_URL =
-  "wss://data-stream.binance.vision/stream?streams=btcusdt@trade/ethusdt@trade/solusdt@trade";
 
 export function useBinanceTradeStream(
   symbols: readonly string[],
@@ -29,7 +27,10 @@ export function useBinanceTradeStream(
       subscribeBinanceTrades({
         onState: setState,
         symbols: symbolKey ? symbolKey.split(",") : [],
-        url: BINANCE_TRADE_STREAM_URL,
+        url: createBinanceCombinedStreamURL(
+          symbolKey ? symbolKey.split(",") : [],
+          "trade",
+        ),
       }),
     [reconnectKey, symbolKey],
   );

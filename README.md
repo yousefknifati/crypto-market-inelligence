@@ -203,10 +203,12 @@ browser query functions.
 
 ## Binance live prices
 
-Set the public market-stream URL in `.env.local` and your deployment environment:
+The browser streams default to Binance's public market-data endpoint, so no
+WebSocket environment variable is required in development or production. To
+use a different compatible Binance endpoint, set this optional public override:
 
 ```dotenv
-NEXT_PUBLIC_BINANCE_WS_URL=wss://stream.binance.com:9443
+NEXT_PUBLIC_BINANCE_WS_URL=wss://data-stream.binance.vision
 ```
 
 Call `useBinancePrices(["btcusdt", "ethusdt"])` inside a Client Component to get
@@ -220,7 +222,9 @@ and closes the connection and clears retry timers on unmount or symbol changes.
 Browser WebSocket handles protocol ping/pong frames automatically.
 Connection status is `connecting`, `connected`, `reconnecting`, or `disconnected`.
 During reconnection, retained prices are stale; consumers should show the status.
-An empty symbol list or missing URL leaves it disconnected.
+An empty symbol list or invalid override leaves it disconnected. The header,
+sidebar, asset-detail feed badge, and live trade panel share the same endpoint
+configuration so their production behavior does not diverge.
 
 The sidebar's isolated `ConnectionStatus` component uses the hook with BTCUSDT
 to show the real connection status. Frequent price updates stay within that
