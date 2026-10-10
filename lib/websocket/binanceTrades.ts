@@ -3,35 +3,42 @@ import type {
   BinanceTradePayload,
   BinanceTradeStreamState,
   BinanceTradeStreamSubscription,
-} from "@/type/binanceTrade";
+} from "@/types/binanceTrade";
 
 function isBinanceTradePayload(value: unknown): value is BinanceTradePayload {
   if (typeof value !== "object" || value === null) return false;
 
   const payload = value as Partial<BinanceTradePayload>;
-  return payload.e === "trade"
-    && typeof payload.E === "number"
-    && Number.isFinite(payload.E)
-    && typeof payload.s === "string"
-    && typeof payload.t === "number"
-    && Number.isFinite(payload.t)
-    && typeof payload.p === "string"
-    && payload.p.trim() !== ""
-    && Number.isFinite(Number(payload.p))
-    && typeof payload.q === "string"
-    && payload.q.trim() !== ""
-    && Number.isFinite(Number(payload.q))
-    && typeof payload.T === "number"
-    && Number.isFinite(payload.T)
-    && typeof payload.m === "boolean"
-    && typeof payload.M === "boolean";
+  return (
+    payload.e === "trade" &&
+    typeof payload.E === "number" &&
+    Number.isFinite(payload.E) &&
+    typeof payload.s === "string" &&
+    typeof payload.t === "number" &&
+    Number.isFinite(payload.t) &&
+    typeof payload.p === "string" &&
+    payload.p.trim() !== "" &&
+    Number.isFinite(Number(payload.p)) &&
+    typeof payload.q === "string" &&
+    payload.q.trim() !== "" &&
+    Number.isFinite(Number(payload.q)) &&
+    typeof payload.T === "number" &&
+    Number.isFinite(payload.T) &&
+    typeof payload.m === "boolean" &&
+    typeof payload.M === "boolean"
+  );
 }
 
-function parseBinanceTradeMessage(value: unknown): BinanceCombinedTradeMessage | null {
+function parseBinanceTradeMessage(
+  value: unknown,
+): BinanceCombinedTradeMessage | null {
   if (typeof value !== "object" || value === null) return null;
 
   const message = value as Partial<BinanceCombinedTradeMessage>;
-  if (typeof message.stream !== "string" || !isBinanceTradePayload(message.data)) {
+  if (
+    typeof message.stream !== "string" ||
+    !isBinanceTradePayload(message.data)
+  ) {
     return null;
   }
 
@@ -146,9 +153,10 @@ export function subscribeBinanceTrades({
       const price = Number(message.data.p);
       const quantity = Number(message.data.q);
       const previousPrice = state.trades[message.data.s]?.price;
-      const priceChangePercent = previousPrice && previousPrice !== 0
-        ? ((price - previousPrice) / previousPrice) * 100
-        : null;
+      const priceChangePercent =
+        previousPrice && previousPrice !== 0
+          ? ((price - previousPrice) / previousPrice) * 100
+          : null;
 
       clearTimeout(emptyTimer);
       publish({
@@ -173,7 +181,9 @@ export function subscribeBinanceTrades({
 
     currentSocket.onerror = () => {
       if (!stopped) {
-        publish({ error: "The Binance live stream connection was interrupted." });
+        publish({
+          error: "The Binance live stream connection was interrupted.",
+        });
       }
       currentSocket.close();
     };

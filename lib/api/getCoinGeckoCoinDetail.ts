@@ -2,7 +2,7 @@ import "server-only";
 
 import axios from "axios";
 import { cacheLife } from "next/cache";
-import type { CoinDetail } from "@/type/coinDetail";
+import type { CoinDetail } from "@/types/coinDetail";
 
 export async function getCoinGeckoCoinDetail(
   id: string,
@@ -30,7 +30,6 @@ export async function getCoinGeckoCoinDetail(
         status === 404 || (status >= 200 && status < 300),
     },
   );
-
 
   return data;
 }

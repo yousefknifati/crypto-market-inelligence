@@ -5,9 +5,10 @@ import { FiMaximize } from "react-icons/fi";
 import toast from "react-hot-toast";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
+import Heading from "@/components/ui/Heading";
 import MarketPriceChart from "./MarketPriceChart";
 import { formatUsdPrice } from "@/lib/utils/formatUsdPrice";
-import type { CoinDetailMarketData, CoinMarketChart } from "@/type/coinDetail";
+import type { CoinDetailMarketData, CoinMarketChart } from "@/types/coinDetail";
 
 export default function MarketChartPanel({
   assetName,
@@ -40,6 +41,9 @@ export default function MarketChartPanel({
       aria-label={`${assetName} price chart`}
       className="min-w-0 rounded-xl border border-sidebar-border bg-white p-4 shadow-sm sm:p-5 fullscreen:overflow-auto fullscreen:p-6"
     >
+      <Heading level={2} className="sr-only">
+        {assetName} price history
+      </Heading>
       <div className="flex flex-wrap gap-2">
         <Badge size="xs" shape="rounded" className="bg-slate-50">
           24h High:{" "}

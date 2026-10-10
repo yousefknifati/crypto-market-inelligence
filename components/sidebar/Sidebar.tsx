@@ -13,7 +13,7 @@ import {
   FiX,
 } from "react-icons/fi";
 import ConnectionStatus from "@/components/sidebar/ConnectionStatus";
-import type { SidebarItem } from "@/type/sidebar";
+import type { SidebarItem } from "@/types/sidebar";
 
 const navigation: SidebarItem[] = [
   { label: "Market Overview", icon: FiBarChart2, href: "/" },
@@ -76,9 +76,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       <nav aria-label="Main navigation" className="mt-6">
         <ul className="space-y-1.5">
           {navigation.map(({ label, icon: Icon, href }) => {
-            const active = href === "/"
-              ? pathname === "/" || pathname.startsWith("/market/")
-              : Boolean(href && (pathname === href || pathname.startsWith(`${href}/`)));
+            const active =
+              href === "/"
+                ? pathname === "/" || pathname.startsWith("/market/")
+                : Boolean(
+                    href &&
+                    (pathname === href || pathname.startsWith(`${href}/`)),
+                  );
             const className = `flex min-h-8 w-full items-center justify-start gap-3 rounded-lg border px-[11px] py-[7px] text-[13px] leading-4 font-semibold tracking-[0.13px] transition-colors motion-reduce:transition-none ${
               active
                 ? "min-h-[34px] border-primary/20 bg-sidebar-active px-3 py-2 text-primary"
@@ -104,7 +108,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     {content}
                   </Link>
                 ) : (
-                  <button type="button" disabled title={`${label} — coming soon`} className={`${className} cursor-not-allowed`}>
+                  <button
+                    type="button"
+                    disabled
+                    title={`${label} — coming soon`}
+                    className={`${className} cursor-not-allowed`}
+                  >
                     {content}
                   </button>
                 )}

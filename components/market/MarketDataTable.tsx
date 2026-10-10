@@ -12,16 +12,21 @@ import MarketTableToolbar, {
   type MarketSortKey,
 } from "@/components/market/MarketTableToolbar";
 import { isNumber } from "@/lib/utils/isNumber";
-import type { MarketSnapshotResult } from "@/type/coinMarket";
+import type { MarketSnapshotResult } from "@/types/coinMarket";
 
-export default function MarketDataTable({ snapshot }: { snapshot: MarketSnapshotResult }) {
+export default function MarketDataTable({
+  snapshot,
+}: {
+  snapshot: MarketSnapshotResult;
+}) {
   const { assets, error } = snapshot;
   const router = useRouter();
   const [isFetching, startTransition] = useTransition();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<MarketFilter>("all");
   const [sortKey, setSortKey] = useState<MarketSortKey>("market_cap");
-  const [sortDirection, setSortDirection] = useState<MarketSortDirection>("desc");
+  const [sortDirection, setSortDirection] =
+    useState<MarketSortDirection>("desc");
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
@@ -39,8 +44,9 @@ export default function MarketDataTable({ snapshot }: { snapshot: MarketSnapshot
           return false;
         }
 
-        const change = asset.price_change_percentage_24h_in_currency
-          ?? asset.price_change_percentage_24h;
+        const change =
+          asset.price_change_percentage_24h_in_currency ??
+          asset.price_change_percentage_24h;
         if (filter === "gainers") return isNumber(change) && change > 0;
         if (filter === "losers") return isNumber(change) && change < 0;
         return true;
@@ -60,10 +66,17 @@ export default function MarketDataTable({ snapshot }: { snapshot: MarketSnapshot
 
   if (assets === null) {
     return (
-      <section role="alert" className="mt-6 w-full rounded-xl border border-rose-200 bg-rose-50 p-5 text-rose-800">
+      <section
+        role="alert"
+        className="mt-6 w-full rounded-xl border border-rose-200 bg-rose-50 p-5 text-rose-800"
+      >
         <h2 className="font-semibold">Cryptocurrency prices are unavailable</h2>
         <p className="mt-1 text-sm">{error}</p>
-        <Button className="mt-4" size="sm" onClick={() => startTransition(() => router.refresh())}>
+        <Button
+          className="mt-4"
+          size="sm"
+          onClick={() => startTransition(() => router.refresh())}
+        >
           Retry
         </Button>
       </section>
@@ -72,9 +85,16 @@ export default function MarketDataTable({ snapshot }: { snapshot: MarketSnapshot
 
   if (assets.length === 0) {
     return (
-      <section role="status" className="mt-6 w-full rounded-xl border border-sidebar-border bg-white p-5 text-sidebar-muted">
-        <h2 className="font-semibold text-slate-900">No cryptocurrency market data</h2>
-        <p className="mt-1 text-sm">CoinGecko returned a successful response without any assets.</p>
+      <section
+        role="status"
+        className="mt-6 w-full rounded-xl border border-sidebar-border bg-white p-5 text-sidebar-muted"
+      >
+        <h2 className="font-semibold text-slate-900">
+          No cryptocurrency market data
+        </h2>
+        <p className="mt-1 text-sm">
+          CoinGecko returned a successful response without any assets.
+        </p>
       </section>
     );
   }
@@ -104,13 +124,18 @@ export default function MarketDataTable({ snapshot }: { snapshot: MarketSnapshot
           setCurrentPage(0);
         }}
         onSortDirectionChange={() => {
-          setSortDirection((direction) => direction === "desc" ? "asc" : "desc");
+          setSortDirection((direction) =>
+            direction === "desc" ? "asc" : "desc",
+          );
           setCurrentPage(0);
         }}
       />
 
       {visibleAssets.length === 0 ? (
-        <div role="status" className="flex min-h-72 flex-col items-center justify-center px-6 py-12 text-center">
+        <div
+          role="status"
+          className="flex min-h-72 flex-col items-center justify-center px-6 py-12 text-center"
+        >
           <h3 className="font-semibold text-slate-900">No matching assets</h3>
           <p className="mt-1 max-w-sm text-sm text-sidebar-muted">
             No assets match the current search and market filter.

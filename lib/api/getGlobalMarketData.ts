@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { CoinGeckoGlobalMarketResponse } from "@/type/globalMarket";
+import type { CoinGeckoGlobalMarketResponse } from "@/types/globalMarket";
 
 export async function getGlobalMarketData(): Promise<CoinGeckoGlobalMarketResponse> {
   const { data } = await axios.get<CoinGeckoGlobalMarketResponse>(

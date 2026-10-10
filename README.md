@@ -65,6 +65,7 @@ Configure these server-side variables in `.env.local` and in your deployment env
 ```dotenv
 COINGECKO_API_BASE_URL=https://api.coingecko.com/api/v3
 COINGECKO_DEMO_API_KEY=your_demo_api_key
+SITE_URL=https://your-public-domain.example
 ```
 
 The `.env.local` file is ignored by Git. The API base URL is configurable;
@@ -85,6 +86,26 @@ input, missing configuration, and HTTP errors, with a 10-second request timeout.
 The response type is defined in `type/coinPrices.ts`.
 Axios does not use Next.js fetch caching options;
 configure rendering/caching in the calling route when integrating this helper.
+
+## SEO
+
+The home route and every asset-detail route publish unique titles, descriptions,
+canonical URLs, Open Graph fields, and Twitter card metadata through the Next.js
+Metadata API. Asset metadata is generated from the server-fetched CoinGecko
+record. Home content and asset statistics are present in the server-rendered HTML,
+with one page-level `h1` and ordered section headings.
+
+Next.js serves `robots.txt` from `app/robots.ts` and `sitemap.xml` from
+`app/sitemap.ts`. The sitemap includes the home page and available asset-detail
+URLs. Home emits `WebSite` JSON-LD; detail pages emit `Dataset` and breadcrumb
+JSON-LD with CoinGecko attribution. JSON-LD values are serialized with `<`
+characters escaped before insertion into the script element.
+
+Set `SITE_URL` to the public production origin so canonical URLs, structured data,
+robots, and sitemap entries use the deployed domain. If no public origin is
+configured, local builds deliberately emit `noindex` metadata, disallow crawling
+in `robots.txt`, and return an empty sitemap. Vercel production URL variables are
+used automatically when present.
 
 First, run the development server:
 

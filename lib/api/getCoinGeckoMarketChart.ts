@@ -2,13 +2,16 @@ import "server-only";
 
 import axios from "axios";
 import { cacheLife } from "next/cache";
-import type { CoinMarketChart } from "@/type/coinDetail";
+import type { CoinMarketChart } from "@/types/coinDetail";
 
-export async function getCoinGeckoMarketChart(id: string): Promise<CoinMarketChart> {
+export async function getCoinGeckoMarketChart(
+  id: string,
+): Promise<CoinMarketChart> {
   "use cache";
   cacheLife({ stale: 60, revalidate: 60, expire: 300 });
 
-  const baseURL = process.env.COINGECKO_API_BASE_URL ?? "https://api.coingecko.com/api/v3";
+  const baseURL =
+    process.env.COINGECKO_API_BASE_URL ?? "https://api.coingecko.com/api/v3";
   const apiKey = process.env.COINGECKO_DEMO_API_KEY;
   const searchParams = new URLSearchParams({
     vs_currency: "usd",

@@ -9,7 +9,7 @@ import {
   FiSearch,
   FiUser,
 } from "react-icons/fi";
-import type { BinanceConnectionStatus } from "@/type/binancePrices";
+import type { BinanceConnectionStatus } from "@/types/binancePrices";
 
 type HeaderToolbarProps = {
   isSidebarOpen: boolean;
@@ -121,7 +121,10 @@ function HeaderToolbar({
           aria-label="Developer tools"
           className="hidden h-7 w-[30px] items-center justify-center rounded-lg outline-none hover:bg-sidebar-surface focus-visible:ring-2 focus-visible:ring-primary/30 sm:flex"
         >
-          <FiCode aria-hidden="true" className="size-[19px] text-sidebar-muted" />
+          <FiCode
+            aria-hidden="true"
+            className="size-[19px] text-sidebar-muted"
+          />
         </button>
 
         <button
@@ -132,7 +135,10 @@ function HeaderToolbar({
           <span className="flex size-7 items-center justify-center rounded-full border border-sidebar-active-border bg-sidebar-active text-[11px] leading-[14px] font-bold tracking-[0.44px] text-primary">
             IN
           </span>
-          <FiUser aria-hidden="true" className="hidden size-[15px] text-sidebar-muted sm:block" />
+          <FiUser
+            aria-hidden="true"
+            className="hidden size-[15px] text-sidebar-muted sm:block"
+          />
         </button>
       </div>
     </div>

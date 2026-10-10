@@ -4,7 +4,7 @@ import { memo } from "react";
 import type {
   BinanceConnectionStatus,
   BinancePrice,
-} from "@/type/binancePrices";
+} from "@/types/binancePrices";
 
 type LiveTickerProps = {
   status: BinanceConnectionStatus;

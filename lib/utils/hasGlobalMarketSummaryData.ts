@@ -1,5 +1,5 @@
 import { isNumber } from "@/lib/utils/isNumber";
-import type { CoinGeckoGlobalMarketData } from "@/type/globalMarket";
+import type { CoinGeckoGlobalMarketData } from "@/types/globalMarket";
 
 export function hasGlobalMarketSummaryData(data: CoinGeckoGlobalMarketData) {
   return [

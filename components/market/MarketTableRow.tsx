@@ -15,7 +15,7 @@ import {
 } from "@/store/features/watchlistSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
-import type { CoinMarket } from "@/type/coinMarket";
+import type { CoinMarket } from "@/types/coinMarket";
 
 type MarketTableRowProps = {
   asset: CoinMarket;

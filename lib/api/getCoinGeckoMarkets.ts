@@ -1,7 +1,7 @@
 import "server-only";
 
 import axios from "axios";
-import type { CoinMarketsResponse } from "@/type/coinMarket";
+import type { CoinMarketsResponse } from "@/types/coinMarket";
 
 export async function getCoinGeckoMarkets(
   ids?: readonly string[],

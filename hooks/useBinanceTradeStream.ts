@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { subscribeBinanceTrades } from "@/lib/websocket/binanceTrades";
-import type { BinanceTradeStreamState } from "@/type/binanceTrade";
+import type { BinanceTradeStreamState } from "@/types/binanceTrade";
 
 const BINANCE_TRADE_STREAM_URL =
   "wss://data-stream.binance.vision/stream?streams=btcusdt@trade/ethusdt@trade/solusdt@trade";
@@ -17,16 +17,22 @@ export function useBinanceTradeStream(
     status: "disconnected",
     trades: {},
   });
-  const symbolKey = [...new Set(symbols.map((symbol) => symbol.trim().toLowerCase()))]
+  const symbolKey = [
+    ...new Set(symbols.map((symbol) => symbol.trim().toLowerCase())),
+  ]
     .filter(Boolean)
     .sort()
     .join(",");
 
-  useEffect(() => subscribeBinanceTrades({
-    onState: setState,
-    symbols: symbolKey ? symbolKey.split(",") : [],
-    url: BINANCE_TRADE_STREAM_URL,
-  }), [reconnectKey, symbolKey]);
+  useEffect(
+    () =>
+      subscribeBinanceTrades({
+        onState: setState,
+        symbols: symbolKey ? symbolKey.split(",") : [],
+        url: BINANCE_TRADE_STREAM_URL,
+      }),
+    [reconnectKey, symbolKey],
+  );
 
   return state;
 }

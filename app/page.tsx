@@ -4,22 +4,28 @@ import { Suspense } from "react";
 import MarketSnapshot from "@/components/market/MarketSnapshot";
 import MarketDataTableSkeleton from "@/components/market/MarketDataTableSkeleton";
 import LivePriceStream from "@/components/live/LivePriceStream";
+import { HomeStructuredData, homeMetadata } from "@/lib/seo/homeSeo";
+
+export const metadata = homeMetadata;
 
 export default function Home() {
   return (
-    <div className="min-h-full w-full min-w-0 max-w-full overflow-x-hidden bg-slate-50 px-3 py-5 sm:px-6 sm:py-6">
-      <MarketOverviewHeader />
-      <MarketSummaryCards />
-      <div className="items-start gap-5 xl:flex">
-        <div className="min-w-0 flex-1">
-          <Suspense fallback={<MarketDataTableSkeleton />}>
-            <MarketSnapshot />
-          </Suspense>
+    <>
+      <HomeStructuredData />
+      <div className="min-h-full w-full min-w-0 max-w-full overflow-x-hidden bg-slate-50 px-3 py-5 sm:px-6 sm:py-6">
+        <MarketOverviewHeader />
+        <MarketSummaryCards />
+        <div className="items-start gap-5 xl:flex">
+          <div className="min-w-0 flex-1">
+            <Suspense fallback={<MarketDataTableSkeleton />}>
+              <MarketSnapshot />
+            </Suspense>
+          </div>
+          <aside aria-label="Live market tools" className="mt-6 shrink-0 xl:w-75">
+            <LivePriceStream />
+          </aside>
         </div>
-        <aside aria-label="Live market tools" className="mt-6 shrink-0 xl:w-75">
-          <LivePriceStream />
-        </aside>
       </div>
-    </div>
+    </>
   );
 }

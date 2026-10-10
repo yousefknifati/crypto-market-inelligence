@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { CoinMarketsResponse } from "@/type/coinMarket";
+import type { CoinMarketsResponse } from "@/types/coinMarket";
 
 export async function getCoinMarkets(
   ids?: readonly string[],

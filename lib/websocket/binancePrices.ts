@@ -1,7 +1,7 @@
 import type {
   BinancePriceState,
   BinancePriceSubscription,
-} from "@/type/binancePrices";
+} from "@/types/binancePrices";
 
 export function subscribeBinancePrices({
   baseURL,
@@ -13,7 +13,9 @@ export function subscribeBinancePrices({
   let stopped = false;
   let attempts = 0;
   let state: BinancePriceState = { status: "disconnected", prices: {} };
-  const selectedSymbols = new Set(symbols.map((symbol) => symbol.toUpperCase()));
+  const selectedSymbols = new Set(
+    symbols.map((symbol) => symbol.toUpperCase()),
+  );
 
   const publishStatus = (status: BinancePriceState["status"]) => {
     state = { ...state, status };
@@ -31,7 +33,9 @@ export function subscribeBinancePrices({
   }
   url.searchParams.set(
     "streams",
-    [...selectedSymbols].map((symbol) => `${symbol.toLowerCase()}@miniTicker`).join("/"),
+    [...selectedSymbols]
+      .map((symbol) => `${symbol.toLowerCase()}@miniTicker`)
+      .join("/"),
   );
 
   function reconnect() {
@@ -66,7 +70,12 @@ export function subscribeBinancePrices({
       } catch {
         return;
       }
-      if (typeof message !== "object" || message === null || !("data" in message)) return;
+      if (
+        typeof message !== "object" ||
+        message === null ||
+        !("data" in message)
+      )
+        return;
       const data = message.data;
       if (typeof data !== "object" || data === null || !("e" in data)) return;
       if (data.e === "serverShutdown") {
@@ -76,16 +85,26 @@ export function subscribeBinancePrices({
       }
       if (
         data.e !== "24hrMiniTicker" ||
-        !("s" in data) || typeof data.s !== "string" ||
+        !("s" in data) ||
+        typeof data.s !== "string" ||
         !selectedSymbols.has(data.s) ||
-        !("c" in data) || typeof data.c !== "string" ||
-        data.c.trim() === "" || !Number.isFinite(Number(data.c)) ||
-        !("o" in data) || typeof data.o !== "string" ||
-        data.o.trim() === "" || !Number.isFinite(Number(data.o)) || Number(data.o) === 0 ||
-        !("E" in data) || typeof data.E !== "number" || !Number.isFinite(data.E)
-      ) return;
+        !("c" in data) ||
+        typeof data.c !== "string" ||
+        data.c.trim() === "" ||
+        !Number.isFinite(Number(data.c)) ||
+        !("o" in data) ||
+        typeof data.o !== "string" ||
+        data.o.trim() === "" ||
+        !Number.isFinite(Number(data.o)) ||
+        Number(data.o) === 0 ||
+        !("E" in data) ||
+        typeof data.E !== "number" ||
+        !Number.isFinite(data.E)
+      )
+        return;
 
-      const priceChangePercent = ((Number(data.c) - Number(data.o)) / Number(data.o)) * 100;
+      const priceChangePercent =
+        ((Number(data.c) - Number(data.o)) / Number(data.o)) * 100;
 
       attempts = 0;
       state = {

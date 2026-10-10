@@ -1,7 +1,7 @@
 import "server-only";
 
 import axios from "axios";
-import type { CoinPricesResponse } from "@/type/coinPrices";
+import type { CoinPricesResponse } from "@/types/coinPrices";
 
 export async function getBitcoinPrice(
   ids: string | readonly string[],
@@ -10,7 +10,9 @@ export async function getBitcoinPrice(
   const apiKey = process.env.COINGECKO_DEMO_API_KEY;
 
   if (!baseURL || !apiKey) {
-    throw new Error("CoinGecko API base URL and demo API key must be configured.");
+    throw new Error(
+      "CoinGecko API base URL and demo API key must be configured.",
+    );
   }
 
   const coinIds = (typeof ids === "string" ? ids.split(",") : ids)

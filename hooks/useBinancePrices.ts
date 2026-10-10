@@ -2,14 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { subscribeBinancePrices } from "@/lib/websocket/binancePrices";
-import type { BinancePriceState } from "@/type/binancePrices";
+import type { BinancePriceState } from "@/types/binancePrices";
 
-export function useBinancePrices(symbols: readonly string[]): BinancePriceState {
+export function useBinancePrices(
+  symbols: readonly string[],
+): BinancePriceState {
   const [state, setState] = useState<BinancePriceState>({
     status: "disconnected",
     prices: {},
   });
-  const symbolKey = [...new Set(symbols.map((symbol) => symbol.trim().toLowerCase()))]
+  const symbolKey = [
+    ...new Set(symbols.map((symbol) => symbol.trim().toLowerCase())),
+  ]
     .filter(Boolean)
     .sort()
     .join(",");

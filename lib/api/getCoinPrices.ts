@@ -1,7 +1,7 @@
 import "server-only";
 
 import axios from "axios";
-import type { CoinPricesResponse } from "@/type/coinPrices";
+import type { CoinPricesResponse } from "@/types/coinPrices";
 
 export async function getCoinPrices(
   ids: string | readonly string[],
@@ -9,7 +9,6 @@ export async function getCoinPrices(
   const baseURL = process.env.COINGECKO_API_BASE_URL;
   const apiKey = process.env.COINGECKO_DEMO_API_KEY;
 
- 
   const coinIds = (typeof ids === "string" ? ids.split(",") : ids)
     .map((id) => id.trim())
     .filter(Boolean);
