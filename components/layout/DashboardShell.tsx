@@ -47,14 +47,22 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
       <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
 
-      <div ref={pageContentRef} className="flex w-0 min-w-0 flex-1 flex-col">
+      <div
+        ref={pageContentRef}
+        className="flex min-w-0 flex-1 flex-col overflow-x-hidden"
+      >
         <MarketHeader
           isSidebarOpen={isSidebarOpen}
           onMenuClick={openSidebar}
         />
-        <main id="main-content" tabIndex={-1} className="min-w-0 flex-1">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="w-full min-w-0 flex-1"
+        >
           <AnimatePresence mode="wait" initial={!prefersReducedMotion}>
             <motion.div
+              className="w-full min-w-0"
               key={pathname}
               initial={
                 prefersReducedMotion ? false : { opacity: 0, y: 8 }

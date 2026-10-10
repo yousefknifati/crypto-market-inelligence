@@ -115,7 +115,7 @@ export default function WatchlistContent() {
       };
 
   return (
-    <div className="min-h-full bg-slate-50 px-4 py-6 sm:px-6">
+    <div className="min-h-full w-full min-w-0 max-w-full overflow-x-hidden bg-slate-50 px-3 py-5 sm:px-6 sm:py-6">
       <header className="flex flex-col gap-3 pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-3">
