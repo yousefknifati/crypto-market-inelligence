@@ -2,6 +2,22 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Asset detail presentation
 
+## Watchlist
+
+`/watchlist` restores favorite CoinGecko IDs from the existing Redux/localStorage
+flow, then requests only those assets through `/api/market/coins?ids=...`. The
+server route forwards the IDs to CoinGecko's `/coins/markets` endpoint so the
+browser never receives the API key and the page does not download unrelated
+market rows. The response is cached by React Query for 60 seconds while the IDs
+remain in Redux as the only shared watchlist state.
+
+The page includes saved/gainer/performance summaries, search, sorting, links to
+asset details, and removal through the shared table row. Restoring, loading,
+empty, filtered-empty, missing-data, and retryable error states are distinct.
+Motion provides a small state transition and uses `useReducedMotion` to disable
+movement when requested. The initial server/client render masks persisted values
+until hydration completes, preventing localStorage-driven attribute mismatches.
+
 ### Home SSR and detail ISR boundaries
 
 On `/`, `MarketSnapshot` waits for a real request using Next.js `connection()`

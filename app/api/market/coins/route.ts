@@ -1,9 +1,15 @@
 import axios from "axios";
+import type { NextRequest } from "next/server";
 import { getCoinGeckoMarkets } from "@/lib/api/getCoinGeckoMarkets";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const data = await getCoinGeckoMarkets();
+    const ids = request.nextUrl.searchParams
+      .get("ids")
+      ?.split(",")
+      .map((id) => id.trim())
+      .filter(Boolean);
+    const data = await getCoinGeckoMarkets(ids);
 
     return Response.json(data, {
       headers: {
