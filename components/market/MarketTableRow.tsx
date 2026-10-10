@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { memo } from "react";
 import { FiStar, FiTrendingDown, FiTrendingUp } from "react-icons/fi";
 import Badge from "@/components/ui/Badge";
@@ -7,8 +8,13 @@ import { formatCompactUsd } from "@/lib/utils/formatCompactUsd";
 import { formatPercentage } from "@/lib/utils/formatPercentage";
 import { formatUsdPrice } from "@/lib/utils/formatUsdPrice";
 import { isNumber } from "@/lib/utils/isNumber";
-import { selectIsFavorite, selectWatchlistHydrated, toggleFavorite } from "@/store/features/watchlistSlice";
+import {
+  selectIsFavorite,
+  selectWatchlistHydrated,
+  toggleFavorite,
+} from "@/store/features/watchlistSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import type { CoinMarket } from "@/type/coinMarket";
 
 type MarketTableRowProps = {
@@ -18,10 +24,16 @@ type MarketTableRowProps = {
 
 function MarketTableRow({ asset, fallbackRank }: MarketTableRowProps) {
   const dispatch = useAppDispatch();
-  const isFavorite = useAppSelector((state) => selectIsFavorite(state, asset.id));
+  const isFavorite = useAppSelector((state) =>
+    selectIsFavorite(state, asset.id),
+  );
   const watchlistHydrated = useAppSelector(selectWatchlistHydrated);
-  const change = asset.price_change_percentage_24h_in_currency
-    ?? asset.price_change_percentage_24h;
+  const hasHydrated = useHasHydrated();
+  const watchlistReady = hasHydrated && watchlistHydrated;
+  const displayedFavorite = watchlistReady && isFavorite;
+  const change =
+    asset.price_change_percentage_24h_in_currency ??
+    asset.price_change_percentage_24h;
   const hasChange = isNumber(change);
   const symbol = asset.symbol.toUpperCase();
 
@@ -33,26 +45,49 @@ function MarketTableRow({ asset, fallbackRank }: MarketTableRowProps) {
       <th scope="row" className="px-3 py-2.5 text-left">
         <div className="flex items-center gap-2.5">
           {asset.image ? (
-            <Image src={asset.image} alt="" width={24} height={24} className="size-6 rounded-full" />
+            <Image
+              src={asset.image}
+              alt=""
+              width={24}
+              height={24}
+              className="size-6 rounded-full"
+            />
           ) : (
-            <span aria-hidden="true" className="flex size-6 items-center justify-center rounded-full border border-sidebar-border bg-sidebar-surface text-[10px] font-bold text-sidebar-muted">
+            <span
+              aria-hidden="true"
+              className="flex size-6 items-center justify-center rounded-full border border-sidebar-border bg-sidebar-surface text-[10px] font-bold text-sidebar-muted"
+            >
               {symbol.slice(0, 1)}
             </span>
           )}
-          <span className="min-w-0">
+          <Link
+            href={`/market/${asset.id}`}
+            className="min-w-0 rounded outline-none hover:text-primary focus-visible:ring-2 focus-visible:ring-primary/30"
+          >
             <span className="font-semibold text-slate-900">{asset.name}</span>
-            <span className="ml-1.5 text-[11px] font-medium tracking-[0.22px] text-slate-400">{symbol}</span>
-          </span>
+            <span className="ml-1.5 text-[11px] font-medium tracking-[0.22px] text-slate-400">
+              {symbol}
+            </span>
+          </Link>
         </div>
       </th>
       <td className="px-3 py-2.5 text-right text-sm font-semibold whitespace-nowrap text-slate-900">
         {formatUsdPrice(asset.current_price)}
       </td>
       <td className="px-3 py-2.5 text-right">
-        <Badge size="xs" tone={!hasChange ? "neutral" : change >= 0 ? "success" : "danger"}>
-          {hasChange && change >= 0 && <FiTrendingUp aria-hidden="true" className="size-3" />}
-          {hasChange && change < 0 && <FiTrendingDown aria-hidden="true" className="size-3" />}
-          {hasChange ? `${change >= 0 ? "+" : ""}${formatPercentage(change)}` : "Unavailable"}
+        <Badge
+          size="xs"
+          tone={!hasChange ? "neutral" : change >= 0 ? "success" : "danger"}
+        >
+          {hasChange && change >= 0 && (
+            <FiTrendingUp aria-hidden="true" className="size-3" />
+          )}
+          {hasChange && change < 0 && (
+            <FiTrendingDown aria-hidden="true" className="size-3" />
+          )}
+          {hasChange
+            ? `${change >= 0 ? "+" : ""}${formatPercentage(change)}`
+            : "Unavailable"}
         </Badge>
       </td>
       <td className="px-3 py-2.5 text-right text-sm whitespace-nowrap text-sidebar-muted">
@@ -63,20 +98,30 @@ function MarketTableRow({ asset, fallbackRank }: MarketTableRowProps) {
       </td>
       <td className="px-3 py-2.5 text-center">
         <div className="flex justify-center">
-          <MarketSparkline assetName={asset.name} prices={asset.sparkline_in_7d?.price} />
+          <MarketSparkline
+            assetName={asset.name}
+            prices={asset.sparkline_in_7d?.price}
+          />
         </div>
       </td>
       <td className="px-2 py-2.5 text-center">
         <button
           type="button"
-          disabled={!watchlistHydrated}
-          aria-label={`${isFavorite ? "Remove" : "Add"} ${asset.name} ${isFavorite ? "from" : "to"} watchlist`}
-          aria-pressed={isFavorite}
-          title={watchlistHydrated ? `${isFavorite ? "Remove from" : "Add to"} watchlist` : "Restoring watchlist"}
+          disabled={!watchlistReady}
+          aria-label={`${displayedFavorite ? "Remove" : "Add"} ${asset.name} ${displayedFavorite ? "from" : "to"} watchlist`}
+          aria-pressed={displayedFavorite}
+          title={
+            watchlistReady
+              ? `${displayedFavorite ? "Remove from" : "Add to"} watchlist`
+              : "Restoring watchlist"
+          }
           onClick={() => dispatch(toggleFavorite(asset.id))}
-          className={`rounded p-1 outline-none transition-colors motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:cursor-wait ${isFavorite ? "text-amber-500" : "text-slate-300 hover:text-amber-500"}`}
+          className={`rounded p-1 outline-none transition-colors motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:cursor-wait ${displayedFavorite ? "text-amber-500" : "text-slate-300 hover:text-amber-500"}`}
         >
-          <FiStar aria-hidden="true" className={`size-4 ${isFavorite ? "fill-current" : ""}`} />
+          <FiStar
+            aria-hidden="true"
+            className={`size-4 ${displayedFavorite ? "fill-current" : ""}`}
+          />
         </button>
       </td>
     </tr>

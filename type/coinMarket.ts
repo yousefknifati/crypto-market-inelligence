@@ -43,6 +43,10 @@ export type CoinMarket = {
 
 export type CoinMarketsResponse = CoinMarket[];
 
+export type MarketSnapshotResult =
+  | { assets: CoinMarketsResponse; error: null }
+  | { assets: null; error: string };
+
 export type CoinMarketsErrorResponse = {
   message: string;
 };

@@ -1,5 +1,47 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Asset detail presentation
+
+### Home SSR and detail ISR boundaries
+
+On `/`, `MarketSnapshot` waits for a real request using Next.js `connection()`
+and calls the uncached, server-only Axios `getCoinGeckoMarkets` helper directly.
+This deliberately fetches current market-cap rankings per server request instead
+of freezing the initial table at build time. The trade-off is an upstream API
+request and its latency for each page request. A local Suspense boundary streams
+the existing table skeleton while the surrounding dashboard can render.
+
+The server passes the snapshot to `MarketDataTable`, whose initial rows are
+included in server-rendered HTML. Its client boundary handles search, filters,
+sorting, pagination, and watchlist interaction. The table no longer fetches a
+duplicate snapshot with React Query or copies market responses into Redux.
+An upstream failure renders an error with Retry; Retry uses `router.refresh()`
+to fetch a new server snapshot. Empty successful responses remain distinct.
+Browser filtering uses the fetched top 100 assets; it does not fetch on each
+keystroke or automatically refresh on window focus.
+
+`/market/[id]` retains its explicit ISR caching: 60-second revalidation and
+300-second expiry. This reduces upstream traffic for repeated detail visits
+while allowing modest staleness. Revalidation is demand-driven, not polling.
+The existing `/api/market/coins` response cache is bypassed by home SSR.
+
+The asset detail page composes reusable summary, chart panel, action, and metric
+components. Summary and fundamental data stay server-rendered. The chart panel
+is a client boundary for selecting 24H/7D and fullscreen; it filters the existing
+seven-day hourly response with `useMemo`. Detail requests retain their existing
+60-second revalidation and 300-second expiry policy.
+
+Watchlist actions use the existing Redux persistence. CSV export contains actual
+timestamp/price observations, not OHLCV candles. Sharing copies the asset URL.
+Alerts, candles, depth, and longer chart periods are visibly disabled because
+their data or service is not integrated. Network health displays an unavailable
+state; source attribution is CoinGecko. The breadcrumb feed badge reports the
+shared Binance BTC stream's actual connection state, not asset-specific latency.
+
+The supplied screenshots guided this layout using Codex. The design's static
+live status, FIX protocol label, and oracle verification claim were corrected
+to reflect the implemented sources rather than copied as factual claims.
+
 ## Getting Started
 
 Configure these server-side variables in `.env.local` and in your deployment environment:

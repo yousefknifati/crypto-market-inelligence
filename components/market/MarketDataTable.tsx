@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import MarketDataTableSkeleton from "@/components/market/MarketDataTableSkeleton";
 import MarketTable from "@/components/market/MarketTable";
@@ -11,29 +11,19 @@ import MarketTableToolbar, {
   type MarketSortDirection,
   type MarketSortKey,
 } from "@/components/market/MarketTableToolbar";
-import { getCoinMarkets } from "@/lib/api/getCoinMarkets";
 import { isNumber } from "@/lib/utils/isNumber";
+import type { MarketSnapshotResult } from "@/type/coinMarket";
 
-export default function MarketDataTable() {
+export default function MarketDataTable({ snapshot }: { snapshot: MarketSnapshotResult }) {
+  const { assets, error } = snapshot;
+  const router = useRouter();
+  const [isFetching, startTransition] = useTransition();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<MarketFilter>("all");
   const [sortKey, setSortKey] = useState<MarketSortKey>("market_cap");
   const [sortDirection, setSortDirection] = useState<MarketSortDirection>("desc");
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const {
-    data: assets,
-    error,
-    isError,
-    isFetching,
-    isPending,
-    refetch,
-  } = useQuery({
-    queryKey: ["market", "coins", "usd", 100, 1],
-    queryFn: getCoinMarkets,
-    retry: 1,
-    staleTime: 60_000,
-  });
 
   const filteredAssets = useMemo(() => {
     if (!assets) return [];
@@ -66,14 +56,14 @@ export default function MarketDataTable() {
       });
   }, [assets, filter, search, sortDirection, sortKey]);
 
-  if (isPending) return <MarketDataTableSkeleton />;
+  if (isFetching && assets === null) return <MarketDataTableSkeleton />;
 
-  if (isError) {
+  if (assets === null) {
     return (
       <section role="alert" className="mt-6 w-full rounded-xl border border-rose-200 bg-rose-50 p-5 text-rose-800">
         <h2 className="font-semibold">Cryptocurrency prices are unavailable</h2>
-        <p className="mt-1 text-sm">{error.message}</p>
-        <Button className="mt-4" size="sm" onClick={() => void refetch()}>
+        <p className="mt-1 text-sm">{error}</p>
+        <Button className="mt-4" size="sm" onClick={() => startTransition(() => router.refresh())}>
           Retry
         </Button>
       </section>

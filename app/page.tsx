@@ -1,6 +1,8 @@
 import MarketOverviewHeader from "@/components/market/MarketOverviewHeader";
 import MarketSummaryCards from "@/components/market/MarketSummaryCards";
-import MarketDataTable from "@/components/market/MarketDataTable";
+import { Suspense } from "react";
+import MarketSnapshot from "@/components/market/MarketSnapshot";
+import MarketDataTableSkeleton from "@/components/market/MarketDataTableSkeleton";
 import LivePriceStream from "@/components/live/LivePriceStream";
 
 export default function Home() {
@@ -10,7 +12,9 @@ export default function Home() {
       <MarketSummaryCards />
       <div className="items-start gap-5 xl:flex">
         <div className="min-w-0 flex-1">
-          <MarketDataTable />
+          <Suspense fallback={<MarketDataTableSkeleton />}>
+            <MarketSnapshot />
+          </Suspense>
         </div>
         <aside aria-label="Live market tools" className="mt-6 shrink-0 xl:w-75">
           <LivePriceStream />
