@@ -107,6 +107,59 @@ configured, local builds deliberately emit `noindex` metadata, disallow crawling
 in `robots.txt`, and return an empty sitemap. Vercel production URL variables are
 used automatically when present.
 
+## Accessibility and resilience
+
+The dashboard provides a skip link, visible keyboard focus, labeled search and
+sort fields, names for icon-only controls, and a mobile navigation drawer that
+traps focus, closes with Escape, and restores focus to its trigger. The market
+chart supports pointer inspection plus Left/Right, Home, and End keyboard
+navigation. Statuses and price directions include text, signs, or icons so color
+is not the only cue. Motion transitions and skeleton animation respect the
+operating system's reduced-motion preference.
+
+REST-backed views distinguish loading, error, empty, and missing-field states.
+Retry actions are available for the market overview, summary, watchlist, asset
+details, and historical chart. Binance streams expose connecting, reconnecting,
+connected, and disconnected labels, retry with capped backoff, clean up sockets
+and timers, and reject invalid stream configuration without throwing into the
+React tree. Nullable numeric fields render as `Unavailable` instead of fabricated
+zero values.
+
+Secrets stay in ignored `.env.local` files or deployment environment variables.
+Only placeholder values are documented; public WebSocket URLs are safe to expose
+through `NEXT_PUBLIC_` configuration.
+
+## Performance decisions
+
+`MarketDataTable` memoizes the search, filter, and sort pipeline because it can
+process and reorder up to 100 market rows on each interactive change. The
+watchlist memoizes its ID lookup and visible sorting pipeline, and the detail
+chart memoizes its 24-hour slice of the seven-day series. These are the derived
+collections whose repeated work grows with the response size.
+
+`MarketTableRow` uses `React.memo` because rows repeat and retain stable asset
+object references while unrelated table controls change. Each row also selects
+only its own favorite boolean, so toggling one favorite does not make every row
+respond to the Redux update. `HeaderToolbar` and `LiveTicker` are memoized around
+the high-frequency header stream, while stable drawer callbacks are supplied
+with `useCallback`. Small fixed-size operations, such as finding the latest item
+among three or four live symbols, remain plain calculations to avoid premature
+memoization.
+
+Pages and data-fetching components remain Server Components. Client boundaries
+are limited to browser state, WebSocket subscriptions, Redux persistence, chart
+interaction, and retry controls; nested accessibility hooks inherit their client
+owner instead of declaring additional boundaries. CoinGecko logos use
+`next/image`. The noncritical live-price widget and toast renderer are loaded
+with `next/dynamic` and render lightweight fallbacks while their client code
+loads.
+
+Frequent Binance updates stay inside `MarketHeader`, `ConnectionStatus`, or
+`LivePriceStream`; they are not copied into Redux or a page-level context. This
+keeps market tables, summary cards, asset details, and watchlist content outside
+the WebSocket render path. Sockets and reconnect timers are cleaned up whenever
+their owning component unmounts or its subscription changes.
+
 First, run the development server:
 
 ```bash

@@ -1,6 +1,5 @@
-"use client";
-
-import { useState, type PointerEvent as ReactPointerEvent } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
+import { useKeyboardChartNavigation } from "@/hooks/useKeyboardChartNavigation";
 import { isNumber } from "@/lib/utils/isNumber";
 import { formatUsdPrice } from "@/lib/utils/formatUsdPrice";
 import Button from "@/components/ui/Button";
@@ -18,7 +17,18 @@ export default function MarketPriceChart({
   prices,
   period,
 }: MarketPriceChartProps) {
-  const [activePointIndex, setActivePointIndex] = useState<number | null>(null);
+  const points =
+    prices?.filter(
+      (point): point is [number, number] =>
+        isNumber(point[0]) && isNumber(point[1]),
+    ) ?? [];
+  const {
+    activePointIndex,
+    handleChartBlur,
+    handleChartFocus,
+    handleChartKeyDown,
+    setActivePointIndex,
+  } = useKeyboardChartNavigation(points.length);
 
   if (error) {
     return (
@@ -39,11 +49,6 @@ export default function MarketPriceChart({
     );
   }
 
-  const points =
-    prices?.filter(
-      (point): point is [number, number] =>
-        isNumber(point[0]) && isNumber(point[1]),
-    ) ?? [];
   if (points.length < 2) {
     return (
       <div
@@ -102,13 +107,22 @@ export default function MarketPriceChart({
 
   return (
     <div className="overflow-hidden rounded-lg border border-sidebar-border bg-slate-50/60 px-0 pb-3 pt-6">
+      <p id="market-chart-instructions" className="sr-only">
+        Focus the chart and use the left and right arrow keys to inspect prices.
+        Use Home or End to jump to the first or last point.
+      </p>
       <div className="relative">
         <svg
           role="img"
           aria-label={`${assetName} ${period} price chart from ${formatUsdPrice(values[0])} to ${formatUsdPrice(values.at(-1))}`}
+          aria-describedby="market-chart-instructions"
+          tabIndex={0}
           viewBox="0 0 760 240"
-          className="h-64 w-full sm:h-80"
+          className="h-64 w-full rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:h-80"
           preserveAspectRatio="none"
+          onBlur={handleChartBlur}
+          onFocus={handleChartFocus}
+          onKeyDown={handleChartKeyDown}
           onPointerMove={handlePointerMove}
           onPointerLeave={() => setActivePointIndex(null)}
         >
@@ -202,6 +216,11 @@ export default function MarketPriceChart({
             </p>
           </div>
         )}
+        <span className="sr-only" aria-live="polite">
+          {activePoint
+            ? `${formatUsdPrice(activePoint[1])} at ${new Date(activePoint[0]).toLocaleString("en-US", { timeZone: "UTC" })}`
+            : ""}
+        </span>
         <div
           aria-hidden="true"
           className="pointer-events-none absolute top-[13.333%] right-3 bottom-[6.667%] flex flex-col justify-between text-[11px] leading-none text-sidebar-muted"

@@ -23,18 +23,17 @@ export default async function MarketDetailPage({
   params,
 }: PageProps<"/market/[id]">) {
   const { id } = await params;
-  const [asset, chartResult] = await Promise.all([
-    getCoinGeckoCoinDetail(id),
-    getCoinGeckoMarketChart(id)
-      .then((chart) => ({ chart, error: undefined }))
-      .catch((error: unknown) => ({
-        chart: undefined,
-        error:
-          error instanceof Error ? error.message : "The chart request failed.",
-      })),
-  ]);
+  const asset = await getCoinGeckoCoinDetail(id);
 
   if (!asset) notFound();
+
+  const chartResult = await getCoinGeckoMarketChart(id)
+    .then((chart) => ({ chart, error: undefined }))
+    .catch((error: unknown) => ({
+      chart: undefined,
+      error:
+        error instanceof Error ? error.message : "The chart request failed.",
+    }));
 
   const marketData = asset.market_data;
   const description = stripHtml(asset.description?.en);

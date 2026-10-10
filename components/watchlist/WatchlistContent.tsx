@@ -147,7 +147,7 @@ export default function WatchlistContent() {
             key="empty"
             {...motionProps}
             role="status"
-            className="flex min-h-[420px] flex-col items-center justify-center rounded-xl border border-dashed border-sidebar-border bg-white px-6 text-center shadow-sm"
+            className="flex min-h-105 flex-col items-center justify-center rounded-xl border border-dashed border-sidebar-border bg-white px-6 text-center shadow-sm"
           >
             <span className="flex size-14 items-center justify-center rounded-full bg-indigo-50 text-primary">
               <FiStar aria-hidden="true" className="size-6" />
@@ -265,7 +265,7 @@ export default function WatchlistContent() {
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
                       placeholder="Search saved assets..."
-                      className="h-8 w-full rounded-lg border border-sidebar-border bg-sidebar-surface pr-3 pl-8 text-[11px] font-medium text-slate-800 outline-none placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/15"
+                      className="h-8 w-full rounded-lg border border-sidebar-border bg-sidebar-surface pr-3 pl-8 text-[11px] font-medium text-slate-800 outline-none focus:ring-2 focus:ring-primary/15"
                     />
                   </label>
                   <div className="flex items-center gap-2">
@@ -281,7 +281,7 @@ export default function WatchlistContent() {
                       onChange={(event) =>
                         setSort(event.target.value as WatchlistSort)
                       }
-                      className="h-8 rounded-lg border border-sidebar-border bg-sidebar-surface px-2.5 text-[11px] font-semibold text-slate-700 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                      className="h-8 rounded-lg border border-sidebar-border bg-sidebar-surface px-2.5 text-[11px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-primary/15"
                     >
                       <option value="saved">Saved order</option>
                       <option value="market_cap">Market cap</option>

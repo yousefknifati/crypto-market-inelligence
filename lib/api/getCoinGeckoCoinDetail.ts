@@ -3,6 +3,8 @@ import "server-only";
 import axios from "axios";
 import { cacheLife } from "next/cache";
 import type { CoinDetail } from "@/types/coinDetail";
+import { getCoinGeckoRequestErrorMessage } from "@/lib/utils/getCoinGeckoRequestErrorMessage";
+import { isCoinGeckoCoinDetailResponse } from "@/lib/utils/isCoinGeckoCoinDetailResponse";
 
 export async function getCoinGeckoCoinDetail(
   id: string,
@@ -20,16 +22,35 @@ export async function getCoinGeckoCoinDetail(
     developer_data: "false",
     sparkline: "false",
   });
-  const { data } = await axios.get<CoinDetail>(
-    `/coins/${encodeURIComponent(id)}?${searchParams.toString()}`,
-    {
-      baseURL,
-      headers: apiKey ? { "x-cg-demo-api-key": apiKey } : undefined,
-      timeout: 10_000,
-      validateStatus: (status) =>
-        status === 404 || (status >= 200 && status < 300),
-    },
-  );
+  let data: unknown;
+  let status: number;
+  try {
+    const response = await axios.get<unknown>(
+      `/coins/${encodeURIComponent(id)}?${searchParams.toString()}`,
+      {
+        baseURL,
+        headers: apiKey ? { "x-cg-demo-api-key": apiKey } : undefined,
+        timeout: 10_000,
+        validateStatus: (responseStatus) =>
+          responseStatus === 404 ||
+          (responseStatus >= 200 && responseStatus < 300),
+      },
+    );
+    data = response.data;
+    status = response.status;
+  } catch (error) {
+    throw new Error(
+      getCoinGeckoRequestErrorMessage(
+        error,
+        "Unable to load the CoinGecko asset.",
+      ),
+    );
+  }
+
+  if (status === 404) return null;
+  if (!isCoinGeckoCoinDetailResponse(data)) {
+    throw new Error("CoinGecko returned an incomplete asset response.");
+  }
 
   return data;
 }

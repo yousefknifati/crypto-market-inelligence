@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useRef, useState, type ReactNode } from "react";
 import MarketHeader from "@/components/header/MarketHeader";
 import Sidebar from "@/components/sidebar/Sidebar";
+import { useAccessibleNavigationDrawer } from "@/hooks/useAccessibleNavigationDrawer";
 
 type DashboardShellProps = {
   children: ReactNode;
@@ -10,30 +11,29 @@ type DashboardShellProps = {
 
 export default function DashboardShell({ children }: DashboardShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const pageContentRef = useRef<HTMLDivElement>(null);
+  const closeSidebar = useCallback(() => setIsSidebarOpen(false), []);
+  const openSidebar = useCallback(() => setIsSidebarOpen(true), []);
 
-  useEffect(() => {
-    if (!isSidebarOpen) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsSidebarOpen(false);
-    };
-
-    window.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [isSidebarOpen]);
+  useAccessibleNavigationDrawer({
+    contentRef: pageContentRef,
+    drawerId: "terminal-sidebar",
+    isOpen: isSidebarOpen,
+    onClose: closeSidebar,
+  });
 
   return (
     <div className="flex min-h-dvh w-full min-w-0 max-w-none bg-slate-50">
+      <a
+        href="#main-content"
+        className="fixed top-3 left-3 z-[100] -translate-y-20 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-primary shadow-lg focus:translate-y-0"
+      >
+        Skip to main content
+      </a>
       <button
         type="button"
         aria-label="Close navigation menu"
-        onClick={() => setIsSidebarOpen(false)}
+        onClick={closeSidebar}
         className={`fixed inset-0 z-40 bg-slate-950/35 backdrop-blur-[1px] transition-opacity duration-200 motion-reduce:transition-none xl:hidden ${
           isSidebarOpen
             ? "visible opacity-100"
@@ -41,17 +41,14 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         }`}
       />
 
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-      />
+      <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
 
-      <div className="flex w-0 min-w-0 flex-1 flex-col">
+      <div ref={pageContentRef} className="flex w-0 min-w-0 flex-1 flex-col">
         <MarketHeader
           isSidebarOpen={isSidebarOpen}
-          onMenuClick={() => setIsSidebarOpen(true)}
+          onMenuClick={openSidebar}
         />
-        <main id="main-content" className="min-w-0 flex-1">
+        <main id="main-content" tabIndex={-1} className="min-w-0 flex-1">
           {children}
         </main>
       </div>

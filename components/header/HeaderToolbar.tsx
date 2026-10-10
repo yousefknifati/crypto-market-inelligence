@@ -73,7 +73,9 @@ function HeaderToolbar({
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <button
           type="button"
-          className="hidden h-7 items-center gap-1.5 rounded-lg border border-sidebar-border bg-sidebar-surface px-2.5 text-[11px] leading-[14px] tracking-[0.44px] text-sidebar-muted outline-none hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-primary/30 lg:flex"
+          disabled
+          title="Currency selection is not available yet"
+          className="hidden h-7 cursor-not-allowed items-center gap-1.5 rounded-lg border border-sidebar-border bg-sidebar-surface px-2.5 text-[11px] leading-[14px] tracking-[0.44px] text-sidebar-muted opacity-60 outline-none lg:flex"
         >
           <span className="font-semibold">Currency:</span>
           <span className="font-bold text-slate-900">USD</span>
@@ -94,6 +96,7 @@ function HeaderToolbar({
             className={`size-2 rounded-full ${connected ? "bg-emerald-500" : "bg-amber-500"}`}
           />
           <span>Latency:</span>
+          <span className="sr-only">WebSocket {status}.</span>
           <span className="font-semibold text-slate-800">
             {latency === null ? "—" : `${latency}ms`}
           </span>
@@ -106,8 +109,10 @@ function HeaderToolbar({
 
         <button
           type="button"
+          disabled
           aria-label="Notifications"
-          className="relative flex h-9 w-[25px] items-start justify-center rounded-lg pt-1.5 outline-none hover:bg-sidebar-surface focus-visible:ring-2 focus-visible:ring-primary/30"
+          title="Notifications are not available yet"
+          className="relative flex h-9 w-[25px] cursor-not-allowed items-start justify-center rounded-lg pt-1.5 opacity-60 outline-none"
         >
           <FiBell aria-hidden="true" className="size-4 text-sidebar-muted" />
           <span
@@ -118,8 +123,10 @@ function HeaderToolbar({
 
         <button
           type="button"
+          disabled
           aria-label="Developer tools"
-          className="hidden h-7 w-[30px] items-center justify-center rounded-lg outline-none hover:bg-sidebar-surface focus-visible:ring-2 focus-visible:ring-primary/30 sm:flex"
+          title="Developer tools are not available yet"
+          className="hidden h-7 w-[30px] cursor-not-allowed items-center justify-center rounded-lg opacity-60 outline-none sm:flex"
         >
           <FiCode
             aria-hidden="true"
@@ -129,8 +136,10 @@ function HeaderToolbar({
 
         <button
           type="button"
+          disabled
           aria-label="Open profile menu"
-          className="flex h-9 items-center gap-2 rounded-lg px-1 outline-none hover:bg-sidebar-surface focus-visible:ring-2 focus-visible:ring-primary/30"
+          title="Profile controls are not available yet"
+          className="flex h-9 cursor-not-allowed items-center gap-2 rounded-lg px-1 opacity-60 outline-none"
         >
           <span className="flex size-7 items-center justify-center rounded-full border border-sidebar-active-border bg-sidebar-active text-[11px] leading-[14px] font-bold tracking-[0.44px] text-primary">
             IN

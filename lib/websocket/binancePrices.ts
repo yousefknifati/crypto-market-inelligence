@@ -27,9 +27,16 @@ export function subscribeBinancePrices({
     return () => {};
   }
 
-  const url = new URL("/stream", baseURL);
+  let url: URL;
+  try {
+    url = new URL("/stream", baseURL);
+  } catch {
+    onState(state);
+    return () => {};
+  }
   if (url.protocol !== "wss:") {
-    throw new Error("The Binance WebSocket URL must use wss://.");
+    onState(state);
+    return () => {};
   }
   url.searchParams.set(
     "streams",

@@ -26,6 +26,8 @@ export default function MarketOverviewHeader() {
         </Badge>
         <Button
           aria-label="Export market data as CSV"
+          disabled
+          title="Use an asset detail page to export its price history"
           leadingIcon={<FiDownload aria-hidden="true" className="size-3" />}
         >
           Export CSV

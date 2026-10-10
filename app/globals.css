@@ -9,8 +9,8 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: #4f46e5;
-  --color-secondary: #059669;
-  --color-tertiary: #dc2626;
+  --color-secondary: #047857;
+  --color-tertiary: #be123c;
   --color-neutral: #0f172a;
   --color-sidebar-foreground: #334155;
   --color-sidebar-muted: #64748b;
@@ -50,4 +50,20 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-montserrat), Arial, sans-serif;
+}
+
+:where(a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -12,6 +12,7 @@ const LIVE_MARKETS = [
   { symbol: "ETHUSDT", label: "ETH/USD", baseAsset: "ETH" },
   { symbol: "SOLUSDT", label: "SOL/USD", baseAsset: "SOL" },
 ] as const;
+const LIVE_SYMBOLS = LIVE_MARKETS.map(({ symbol }) => symbol);
 
 const priceFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -37,7 +38,7 @@ export default function LivePriceStream() {
   const [audioEnabled, setAudioEnabled] = useState(false);
   const lastAudioTickAt = useRef(0);
   const { error, hasTimedOut, status, trades } = useBinanceTradeStream(
-    LIVE_MARKETS.map(({ symbol }) => symbol),
+    LIVE_SYMBOLS,
     reconnectKey,
   );
   const latestTrade = useMemo(
@@ -100,7 +101,7 @@ export default function LivePriceStream() {
           <span aria-hidden="true" className={`size-2 rounded-full ${connected ? "bg-emerald-500" : "bg-amber-500"}`} />
           Live Price Stream
         </h2>
-        <span className={`text-[11px] font-semibold ${connected ? "text-emerald-600" : "text-amber-600"}`}>
+        <span className={`text-[11px] font-semibold ${connected ? "text-emerald-700" : "text-amber-700"}`}>
           {latency === null ? "—" : `${latency}ms`}
         </span>
       </div>
@@ -143,13 +144,13 @@ export default function LivePriceStream() {
                   ) : (
                     <Badge size="xs" tone="neutral">WAIT</Badge>
                   )}
-                  <span className={`text-sm font-bold ${trade?.side === "sell" ? "text-rose-600" : "text-emerald-600"}`}>
+                  <span className={`text-sm font-bold ${trade?.side === "sell" ? "text-rose-700" : "text-emerald-700"}`}>
                     {trade ? priceFormatter.format(trade.price) : "Unavailable"}
                   </span>
                 </div>
                 <div className="mt-1.5 flex items-center justify-between gap-2 text-[11px] text-sidebar-muted">
                   <span>Vol: {trade ? `${quantityFormatter.format(trade.quantity)} ${baseAsset}` : "Unavailable"}</span>
-                  <span className={!trade || change === null || change === undefined ? "text-sidebar-muted" : positive ? "text-emerald-600" : "text-rose-600"}>
+                  <span className={!trade || change === null || change === undefined ? "text-sidebar-muted" : positive ? "text-emerald-700" : "text-rose-700"}>
                     {!trade || change === null || change === undefined
                       ? "Waiting for next tick"
                       : `${positive ? "+" : ""}${change.toFixed(3)}% tick`}

@@ -28,7 +28,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <ReduxProvider>
           <ReactQueryProvider>
-            <NextTopLoader color="#1b86be" />
+            <NextTopLoader color="#4f46e5" />
             <DashboardShell>{children}</DashboardShell>
             <AppToaster />
           </ReactQueryProvider>

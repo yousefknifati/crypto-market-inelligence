@@ -61,6 +61,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </Link>
         <button
           type="button"
+          data-drawer-close
           aria-label="Close navigation menu"
           onClick={onClose}
           className="flex size-9 shrink-0 items-center justify-center rounded-lg text-sidebar-muted outline-none hover:bg-sidebar-surface focus-visible:ring-2 focus-visible:ring-primary/30 xl:hidden"
@@ -69,7 +70,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </button>
       </div>
 
-      <p className="mt-6 px-2 pt-[7px] pb-[3px] text-[11px] leading-[14px] font-medium tracking-[0.22px] text-sidebar-muted">
+      <p className="mt-6 px-2 pt-1.75 pb-0.75 text-[11px] leading-[14px] font-medium tracking-[0.22px] text-sidebar-muted">
         Terminal v2.4 • Institutional
       </p>
 
